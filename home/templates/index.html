@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品展示首页</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'images/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'stylesheets/index.css' %}">
+</head>
+<body>
+<div class="navbar">
+    <div class="logo">
+        <img class="brand" src="{% static 'images/logo.png' %}">
+    </div>
+    <div class="user-actions">
+        <span style="padding-right: 20px">登录/注册</span>
+        <span style="padding-right: 20px">购物车</span>
+    </div>
+</div>
+
+<div class="search-bar">
+    <form action="/" method="get" >
+        <input class="text" name="q" type="text" value="{{ q }}" placeholder="输入关键字搜索">
+        <span class="photo-search-btn">
+            <span class="upload-bg" onclick="document.getElementById('upload-image').click()"></span>
+            <input type="file" id="upload-image" accept="image/*" style="display: none;">
+        </span>
+        <input type="hidden" id="image_path"  name="image_path" value="{{ path }}">
+        <button id='submit_search' type="submit" class="button cw-icon"><i></i>搜索</button>
+    </form>
+    <div class="status" id="status"></div>
+</div>
+
+<div class="product-grid">
+    {% for item in goods_list %}
+    <div class="product-card">
+        {% if item.image and  item.image.url %}
+            <img src="{{ item.image.url }}" alt="商品图片">
+        {% elif item.image_url %}
+            <img src="{{ item.image_url }}" alt="商品图片">
+        {% endif %}
+        <div class="product-info">
+            <h3>{{ item.name }}</h3>
+            <p>￥{{ item.price }}</p>
+            <p>评分：★★★★☆</p>
+        </div>
+    </div>
+    {% endfor %}
+    <!-- 更多商品卡片 -->
+</div>
+
+<script>
+    const fileInput = document.getElementById('upload-image');
+    const status = document.getElementById('status');
+
+    fileInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 创建 FormData 对象
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            // 发送 POST 请求
+            const response = await fetch('/image_upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                document.getElementById('image_path').value = result.path;
+                document.getElementById('submit_search').click();
+            }
+        } catch (error) {
+            alert('图片解析向量服务异常');
+        }
+    });
+</script>
+</body>
+</html>

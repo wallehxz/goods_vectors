@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and temporary files
+*.log
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Media and static files
+media/
+static/
+uploads/
+
+# Database files
+*.sqlite3
+*.db
+
+# Virtual environment
+.env/
+.vvenv/
+.venv/
+
+# IDE/Editor
+.idea/
+.vscode/
+
+# Local configuration
+local_settings.py
+
+# Other
+*.bak
+*.tmp
+*.egg-info/
+dist/
+build/

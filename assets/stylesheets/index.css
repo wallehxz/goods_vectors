@@ -1,0 +1,135 @@
+body {
+    font-family: 'Yuanti SC', 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F5F5F5;
+    color: #333;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1A2A3A;
+    color: #FFF;
+}
+
+.brand {
+    width: 45px;
+    margin-left: 10px;
+    padding-top: 5px;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+    position: relative;
+}
+
+.text {
+    float: left;
+    width: 400px;
+    height: 24px;
+    line-height: 24px;
+    color: #999;
+    padding: 4px;
+    margin-bottom: 4px;
+    border-width: 2px 0 2px 2px;
+    border-color: #f30213;
+    border-style: solid;
+    outline: 0;
+    font-size: 12px
+}
+
+.button {
+    float: left;
+    width: 80px;
+    height: 36px;
+    font-family: tahoma,arial,Microsoft YaHei,Hiragino Sans GB,"\u5b8b\u4f53",sans-serif;
+    background: #f30213;
+    border: none;
+    border-radius: 0;
+    line-height: 1;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer
+}
+
+.cw-icon {
+    position: relative;
+    cursor: default;
+    zoom:1
+}
+
+.photo-search-btn {
+    position: absolute;
+    margin-left: -30px;
+    top: 10px;
+    width: 19px;
+    height: 15px;
+    overflow: hidden
+}
+
+.photo-search-btn .upload-bg {
+    display: block;
+    width: 19px;
+    height: 15px;
+    background: url('/assets/images/sprite-photo-search.png') no-repeat;
+    cursor: pointer
+}
+
+.photo-search-btn .upload-trigger {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 500px;
+    height: 500px;
+    cursor: pointer;
+    filter: alpha(opacity=0);
+    opacity: 0
+}
+
+.photo-search-btn:hover .upload-bg {
+    background-position: -30px 0
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
+    gap: 20px;
+    padding: 20px;
+}
+
+.product-card {
+    background-color: #FFF;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-info h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.product-info p {
+    margin: 5px 0;
+    color: #777;
+}
