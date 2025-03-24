@@ -21,11 +21,26 @@ def save_vector(goods_id, embedding):
     collection.insert(entities)
     collection.flush()
 
+def delete_vector(goods_id):
+    expr = f'goods_id == {goods_id}'
+    delete_result = collection.delete(expr)
+    collection.release()
+    print('Milrus delete goods id', goods_id)
+
+def get_vector(goods_id):
+    collection.load()
+    expr = f'goods_id == {goods_id}'
+    output_fields = ["goods_id", "embedding"]
+    result = collection.query(expr, output_fields=output_fields)
+    if len(result) > 0:
+        return result[0]['embedding']
+
 class Goods(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True, verbose_name='商品名称')
     price = models.FloatField(null=True, blank=True,verbose_name='价格')
     image = models.ImageField(upload_to='goods/%Y%m%d/', null=True, blank=True,verbose_name='图片文件')
     image_url = models.CharField(max_length=245, null=True, blank=True,verbose_name='图片链接')
+    is_vector = models.BooleanField(default=False, verbose_name='图片向量')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -37,22 +52,54 @@ class Goods(models.Model):
     def __str__(self):
         return self.name
 
+    def get_vector_shape(self):
+        vector = get_vector(self.id)
+        return f'({len(vector)}, {vector[0]})'
+
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         super().save(*args, **kwargs)
-        if self.has_image():
+        if self.has_image() and self.is_vector == False:
             try:
                 if is_new:
                     image_path = self.image_path()
                     embedding = Goods.get_resnet_vector(image_path)
                     save_vector(self.id, embedding)
+                    self.is_vector = True
+                    self.save()
                 else:
                     if self.check_by_embedding() is False:
                         image_path = self.image_path()
                         embedding = Goods.get_resnet_vector(image_path)
                         save_vector(self.id, embedding)
+                        self.is_vector = True
+                        self.save()
             except Exception as e:
                 print(e)
+
+    def delete_vector(self):
+        if self.check_by_embedding():
+            delete_vector(self.id)
+
+    def update_vector(self):
+        if self.check_by_embedding() and self.is_vector == False:
+            self.is_vector = True
+            self.save()
+        if self.has_image() and self.check_by_embedding() == False:
+            try:
+                image_path = self.image_path()
+                embedding = Goods.get_resnet_vector(image_path)
+                save_vector(self.id, embedding)
+                self.is_vector = True
+                self.save()
+            except Exception as e:
+                print(e)
+
+    def delete(self, *args, ** kwargs):
+        if self.check_by_embedding():
+            delete_vector(self.id)
+        super().delete(*args, ** kwargs)
+
 
     def has_image(self) -> bool:
         if self.image_url is not None:

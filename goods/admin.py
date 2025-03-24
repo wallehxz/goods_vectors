@@ -9,9 +9,14 @@ admin.site.index_title = '商品管理后台'
 
 @admin.register(Goods)
 class GoodsAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'preview', 'has_embedding', 'created_at')
+    list_display = ('name', 'price', 'preview', 'is_vector', 'has_embedding', 'created_at')
     search_fields = ['name']
     list_per_page = 25
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete_vector()
+        super().delete_queryset(request, queryset)
 
     def preview(self, obj):
         if obj.image:
@@ -25,10 +30,9 @@ class GoodsAdmin(admin.ModelAdmin):
 
     def has_embedding(self, obj):
         if obj.check_by_embedding():
-            return '已转换'
+            return obj.get_vector_shape()
         else:
-            return '未转换'
+            return '--'
 
-    has_embedding.short_description = '图片向量'
-
+    has_embedding.short_description = '向量规模'
 # Register your models here.
