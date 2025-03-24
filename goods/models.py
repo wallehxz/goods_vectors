@@ -41,15 +41,18 @@ class Goods(models.Model):
         is_new = self._state.adding
         super().save(*args, **kwargs)
         if self.has_image():
-            if is_new:
-                image_path = self.image_path()
-                embedding = Goods.get_resnet_vector(image_path)
-                save_vector(self.id, embedding)
-            else:
-                if self.check_by_embedding() is False:
+            try:
+                if is_new:
                     image_path = self.image_path()
                     embedding = Goods.get_resnet_vector(image_path)
                     save_vector(self.id, embedding)
+                else:
+                    if self.check_by_embedding() is False:
+                        image_path = self.image_path()
+                        embedding = Goods.get_resnet_vector(image_path)
+                        save_vector(self.id, embedding)
+            except Exception as e:
+                print(e)
 
     def has_image(self) -> bool:
         if self.image_url is not None:
@@ -67,7 +70,7 @@ class Goods(models.Model):
                 temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
                 os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
                 temp_path = os.path.join(temp_dir, f'{uuid.uuid4()}.jpg')
-                with open(temp_path, 'wb+') as destination:
+                with open(temp_path, 'wb') as destination:
                     destination.write(response.content)
                 return temp_path
             except requests.exceptions.RequestException as e:
@@ -127,7 +130,7 @@ class Goods(models.Model):
     @classmethod
     def get_resnet_vector(cls, image_path):
         # 加载模型
-        model = tmodels.resnet50(weights='IMAGENET1K_V1')
+        model = tmodels.resnet50(weights='IMAGENET1K_V2')
         model = torch.nn.Sequential(*(list(model.children())[:-1]))
         model.eval()
         # 预处理

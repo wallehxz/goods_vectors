@@ -47,7 +47,7 @@ def temp_upload(uploaded_file):
     temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
     os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
     temp_path = os.path.join(temp_dir, uploaded_file.name)
-    with open(temp_path, 'wb+') as destination:
+    with open(temp_path, 'wb') as destination:
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
     return temp_path
