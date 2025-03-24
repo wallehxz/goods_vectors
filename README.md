@@ -1,4 +1,4 @@
-## 手机版奖品兑换码
+## 商品图片向量搜索
 
 ### 框架 : Python3 Django, SQL: Postgresql, Cache: Redis, ResNet50 模型
 
