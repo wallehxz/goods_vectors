@@ -39,7 +39,7 @@ class Goods(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True, verbose_name='商品名称')
     price = models.FloatField(null=True, blank=True,verbose_name='价格')
     image = models.ImageField(upload_to='goods/%Y%m%d/', null=True, blank=True,verbose_name='图片文件')
-    image_url = models.CharField(max_length=245, null=True, blank=True,verbose_name='图片链接')
+    image_url = models.CharField(max_length=500, null=True, blank=True,verbose_name='图片链接')
     is_vector = models.BooleanField(default=False, verbose_name='图片向量')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
@@ -48,6 +48,11 @@ class Goods(models.Model):
         db_table = 'goods'
         verbose_name = '商品表'
         verbose_name_plural = verbose_name
+
+        indexes = [
+            models.Index(fields=['id', 'name']),  # 复合索引
+            models.Index(fields=['name'], name='name_idx'),  # 单独索引
+        ]
 
     def __str__(self):
         return self.name
@@ -112,7 +117,17 @@ class Goods(models.Model):
     def image_path(self):
         if self.image_url is not None:
             try:
-                response = requests.get(self.image_url, timeout=10)
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+                    "Accept-Encoding": "gzip, deflate, br, zstd",
+                    "Accept-Language": "zh-CN,zh;q=0.9",
+                    "Cache-Control": "no-cache",
+                    "Sec-Ch-Ua": '"Not A(Brand";v="8", "Chromium";v="132", "Google Chrome";v="132"',
+                    "Upgrade-Insecure-Requests": "1",
+                    "Sec-Ch-Ua-Platform": '"Windows"',
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+                }
+                response = requests.get(self.image_url, timeout=10, headers=headers)
                 response.raise_for_status()  # 检查请求是否成功
                 temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
                 os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
@@ -122,6 +137,8 @@ class Goods(models.Model):
                 return temp_path
             except requests.exceptions.RequestException as e:
                 print(f"Error：{e}")
+                print(f"Request failed with status code: {response.status_code}")
+                print(f"Response content: {response.text}")  # 打印错误信息
         elif self.image and self.image.url:
             return self.image.path
 

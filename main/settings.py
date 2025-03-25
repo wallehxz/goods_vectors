@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'goods.apps.GoodsConfig',
     'home.apps.HomeConfig',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -96,6 +97,9 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://127.0.0.1:6379',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
     }
 }
 
@@ -159,7 +163,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLEUI_CONFIG = {
     'system_keep': False,
-    'menu_display': ['问答助手', '商品管理', '管理权限'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
+    'menu_display': ['问答助手', '商品管理', '任务管理', '管理权限'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
     'dynamic': True,    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时动态展示菜单内容
     'menus': [{
         'name': '问答助手',
@@ -180,8 +184,37 @@ SIMPLEUI_CONFIG = {
             'url': 'auth/group/'
         }]
     },  {
-        'name': '商品管理',
-        'url': 'goods/goods/',
-        'icon': 'fa fa-solid fa-swatchbook'
-    }]
+            'name': '商品管理',
+            'url': 'goods/goods/',
+            'icon': 'fa fa-solid fa-swatchbook'
+    },  {
+            'name': '任务管理',
+            'icon': 'fas fa-tasks',
+            'models': [
+                {
+                    'name': '周期性任务',
+                    'icon': 'fas fa-clock',
+                    'url': 'django_celery_beat/periodictask/',
+                },
+                {
+                    'name': '间隔任务',
+                    'icon': 'fas fa-hourglass',
+                    'url': 'django_celery_beat/intervalschedule/',
+                },
+                {
+                    'name': 'Crontab 任务',
+                    'icon': 'fas fa-calendar-alt',
+                    'url': 'django_celery_beat/crontabschedule/',
+                },
+            ]
+        },]
 }
+
+CELERY_BROKER_URL = 'redis://localhost:6379/2'  # Redis 作为消息代理
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'  # Redis 作为结果存储
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'  # 设置时区
+# django-celery-beat 配置
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
