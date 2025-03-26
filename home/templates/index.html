@@ -21,32 +21,70 @@
 </div>
 
 <div class="search-bar">
-    <form action="/" method="get" >
+    <form action="/" method="get">
         <input class="text" name="q" type="text" value="{{ q }}" placeholder="输入关键字搜索">
         <span class="photo-search-btn">
             <span class="upload-bg" onclick="document.getElementById('upload-image').click()"></span>
             <input type="file" id="upload-image" accept="image/*" style="display: none;">
         </span>
-        <input type="hidden" id="image_path"  name="image_path" value="{{ path }}">
+        <input type="hidden" id="image_path" name="image_path" value="{{ path }}">
         <button id='submit_search' type="submit" class="button cw-icon"><i></i>搜索</button>
     </form>
     <div class="status" id="status"></div>
 </div>
+<!-- 分页导航 -->
+
+<ul class="pagination-cards">
+    {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1" title="First">
+               首页
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" title="Previous">
+                上页
+            </a>
+        </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" title="Next">
+                下页
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" title="Last">
+               末页
+            </a>
+        </li>
+    {% endif %}
+</ul>
+
 
 <div class="product-grid">
-    {% for item in goods_list %}
-    <div class="product-card">
-        {% if item.image and  item.image.url %}
-            <img src="{{ item.image.url }}" alt="商品图片">
-        {% elif item.image_url %}
-            <img src="{{ item.image_url }}" alt="商品图片">
-        {% endif %}
-        <div class="product-info">
-            <h3>{{ item.name }}</h3>
-            <p>￥{{ item.price }}</p>
-            <p>评分：★★★★☆</p>
+    {% for item in page_obj %}
+        <div class="product-card">
+            {% if item.image and  item.image.url %}
+                <img src="{{ item.image.url }}" alt="商品图片">
+            {% elif item.image_url %}
+                <img src="{{ item.image_url }}" alt="商品图片">
+            {% endif %}
+            <div class="product-info">
+                <h3>{{ item.name }}</h3>
+                <p>￥{{ item.price }}</p>
+                <p>评分：★★★★☆</p>
+            </div>
         </div>
-    </div>
     {% endfor %}
     <!-- 更多商品卡片 -->
 </div>

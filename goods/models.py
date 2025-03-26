@@ -59,7 +59,7 @@ class Goods(models.Model):
 
     def get_vector_shape(self):
         vector = get_vector(self.id)
-        return f'(Dim[{len(vector)}], Sum[{sum(vector)}])'
+        return f'(Dim[{len(vector)}], Sum[{int(sum(vector))}])'
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
