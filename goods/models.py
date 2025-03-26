@@ -158,9 +158,10 @@ class Goods(models.Model):
 
 
     @classmethod
-    def similar_vectors(cls, query_embedding, top_k=10):
+    def similar_vectors(cls, query_embedding, top_k=20):
         # 搜索相似向量
         search_params = {"metric_type": "COSINE", "params": {"nprobe": 128}}
+        collection.load()
         results = collection.search(
             data=[query_embedding],
             anns_field="embedding",

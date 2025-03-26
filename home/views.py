@@ -31,9 +31,9 @@ def index(request):
         ).order_by('similarity')
     else:
         goods_list = Goods.objects.all().order_by('-updated_at')
-        paginator = Paginator(goods_list, 91)
-        page_number = request.GET.get('page', 1)
-        page_obj = paginator.get_page(page_number)
+    paginator = Paginator(goods_list, 91)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
     return render(request, 'index.html', locals())
 
 
