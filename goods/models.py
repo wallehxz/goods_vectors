@@ -142,7 +142,7 @@ class Goods(models.Model):
 
     def image_path(self):
         if self.image_url is not None:
-            Goods.temp_image_path(self.image_url)
+            return Goods.temp_image_path(self.image_url)
         elif self.image and self.image.url:
             return self.image.path
 
