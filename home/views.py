@@ -21,14 +21,22 @@ def index(request):
         goods_list = Goods.objects.filter(name__contains=q).all()
     elif path != '':
         image_vector = cache.get(path)
-        milvus_results = Goods.similar_vectors(image_vector)
-        goods_ids, similarities = zip(*milvus_results)
-        goods_list = Goods.objects.filter(id__in=goods_ids).annotate(
-            similarity=Case(
-                *[When(id=goods_id, then=similarity) for goods_id, similarity in milvus_results],
-                default=0.0
-            )
-        ).order_by('similarity')
+        if image_vector is None:
+            goods_list = []
+        else:
+            query_cache_key = f'query_{path}'
+            goods_list = cache.get(query_cache_key)
+            if goods_list is None:
+                milvus_results = Goods.similar_vectors(image_vector)
+                goods_ids, similarities = zip(*milvus_results)
+                goods_list = Goods.objects.filter(id__in=goods_ids).annotate(
+                    similarity=Case(
+                        *[When(id=goods_id, then=similarity) for goods_id, similarity in milvus_results],
+                        default=0.0
+                    )
+                ).order_by('similarity')
+                print(f'cached {len(goods_ids)} goods with vector {path}')
+                cache.set(query_cache_key, goods_list)
     else:
         goods_list = Goods.objects.all().order_by('-updated_at')
     paginator = Paginator(goods_list, 91)
