@@ -81,17 +81,24 @@ def decode_base64_file(data):
 @csrf_exempt
 def image_to_vector(request):
     if request.method == 'POST':
-        base64_data = json.loads(request.body.decode('utf-8'))['image']
-        file_path = decode_base64_file(base64_data)
+        data = json.loads(request.body.decode('utf-8'))
+        verify_flag = data.get('flag', '')
+        if verify_flag != settings.VERIFY_FLAG:
+            return JsonResponse({"status": "Unauthorized"}, safe=False)
+        file_path = decode_base64_file(data.get('image'))
         image_vector = Goods.get_resnet_vector(file_path)
         return JsonResponse({"status": "success", "vector": image_vector}, safe=False)
-    return JsonResponse({"status": "error"}, safe=False)
+    return JsonResponse({"status": "Unauthorized"}, safe=False)
 
 
 @csrf_exempt
 def goods_to_vectors(request):
     if request.method == 'POST':
-        goods_list = json.loads(request.body.decode('utf-8'))['goods']
+        data = json.loads(request.body.decode('utf-8'))
+        verify_flag = data.get('flag', '')
+        if verify_flag != settings.VERIFY_FLAG:
+            return JsonResponse({"status": "Unauthorized"}, safe=False)
+        goods_list = data.get('goods', [])
         vectors_list = []
         for good in goods_list:
             image_url = good.get('list_url')
@@ -100,6 +107,6 @@ def goods_to_vectors(request):
             vector = {"id": good.get('id'), 'vector': image_vector}
             vectors_list.append(vector)
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
-    return JsonResponse({"status": "error"}, safe=False)
+    return JsonResponse({"status": "Unauthorized"}, safe=False)
 
 # Create your views here.
