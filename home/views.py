@@ -1,5 +1,9 @@
+import base64
+import json
 import uuid
 import os
+
+from django.core.files.base import ContentFile
 from django.shortcuts import render
 from goods.models import Goods
 from django.http import JsonResponse
@@ -55,5 +59,47 @@ def temp_upload(uploaded_file):
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
     return temp_path
+
+
+def decode_base64_file(data):
+    if isinstance(data, str) and data.startswith('data:'):
+        header, data = data.split(';base64,')
+        file_ext = header.split('/')[-1]
+        decoded_file = base64.b64decode(data)
+        file_name = f"{uuid.uuid4()}.{file_ext}"
+        save_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
+        os.makedirs(save_dir, exist_ok=True)
+
+        file_path = os.path.join(save_dir, file_name)
+        with open(file_path, 'wb') as destination:
+            for chunk in ContentFile(decoded_file).chunks():
+                destination.write(chunk)
+        return file_path
+    raise ValueError("无效的 base64 文件数据")
+
+
+@csrf_exempt
+def image_to_vector(request):
+    if request.method == 'POST':
+        base64_data = json.loads(request.body.decode('utf-8'))['image']
+        file_path = decode_base64_file(base64_data)
+        image_vector = Goods.get_resnet_vector(file_path)
+        return JsonResponse({"status": "success", "vector": image_vector}, safe=False)
+    return JsonResponse({"status": "error"}, safe=False)
+
+
+@csrf_exempt
+def goods_to_vectors(request):
+    if request.method == 'POST':
+        goods_list = json.loads(request.body.decode('utf-8'))['goods']
+        vectors_list = []
+        for good in goods_list:
+            image_url = good.get('list_url')
+            image_path = Goods.temp_image_path(image_url)
+            image_vector = Goods.get_resnet_vector(image_path)
+            vector = {"id": good.get('id'), 'vector': image_vector}
+            vectors_list.append(vector)
+        return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
+    return JsonResponse({"status": "error"}, safe=False)
 
 # Create your views here.
