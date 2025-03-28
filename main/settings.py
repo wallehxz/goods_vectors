@@ -28,6 +28,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# API Auth
+VERIFY_FLAG = 100
+
+# EMBEDDING_MODEL = 'torch_mnv3'
+# MILVUS_DATA = '960_collection'
+
+# 图片向量处理模型
+EMBEDDING_MODEL = '1'
+# 图片向量存储结合
+MILVUS_DATA = '1'
 
 # Application definition
 
@@ -96,10 +106,13 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
     }
 }
 
+CELERY_BROKER_URL = 'redis://localhost:6379/2'  # Redis 作为消息代理
+
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'  # Redis 作为结果存储
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -124,18 +137,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'zh-hans'
-
 TIME_ZONE = 'Asia/Shanghai'
-
 USE_I18N = True
-
 USE_TZ = True
-
 SIMPLEUI_HOME_INFO = False
-
 SIMPLEUI_LOGO = "/assets/images/logo.png"
 SIMPLEUI_FAVICON = '/assets/images/logo.png'
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -207,18 +214,9 @@ SIMPLEUI_CONFIG = {
         },]
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/2'  # Redis 作为消息代理
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'  # Redis 作为结果存储
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Shanghai'  # 设置时区
 # django-celery-beat 配置
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-# API Auth
-VERIFY_FLAG = 100
-
-# EMBEDDING_MODEL = 'torch_mnv3'
-# MILVUS_DATA = '960_collection'
-EMBEDDING_MODEL = '1'
-MILVUS_DATA = '1'
