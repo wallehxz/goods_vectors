@@ -6,7 +6,7 @@ openpyxl==3.1.5
 django-redis-cache==3.0.1
 django-redis==5.4.0
 cryptography==44.0.2
-tensorflow==2.15.0
+# tensorflow==2.15.0
 numpy==1.24.3
 torch==2.6.0
 requests==2.32.3
@@ -14,3 +14,6 @@ torchvision==0.21.0
 pymilvus==2.5.6
 celery==5.4.0
 django-celery-beat==2.7.0
+redis==3.5.3
+ultralytics==8.3.97
+opencv-python==4.11.0.86

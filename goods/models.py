@@ -1,16 +1,13 @@
 import uuid
 import os
+import time
 from django.db import models
-from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
-from keras.models import Model
-import numpy as np
-from PIL import Image
-import torch.nn as nn
-import torch
-from torchvision import models as tmodels, transforms
-from goods.milvus_client import collection
 import requests
 from django.conf import settings
+if settings.MILVUS_DATA == '960_collection':
+    from utils.milvus_960_collection import collection
+else:
+    from utils.milvus_2048_collection import collection
 
 def save_vector(goods_id, embedding):
     # 插入向量
@@ -64,18 +61,18 @@ class Goods(models.Model):
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         super().save(*args, **kwargs)
-        if self.has_image() and self.is_vector == False:
+        if self.has_image():
             try:
                 if is_new:
                     image_path = self.image_path()
-                    embedding = Goods.get_resnet_vector(image_path)
+                    embedding = Goods.image_to_embedding(image_path)
                     save_vector(self.id, embedding)
                     self.is_vector = True
                     self.save()
                 else:
                     if self.check_by_embedding() is False:
                         image_path = self.image_path()
-                        embedding = Goods.get_resnet_vector(image_path)
+                        embedding = Goods.image_to_embedding(image_path)
                         save_vector(self.id, embedding)
                         self.is_vector = True
                         self.save()
@@ -87,18 +84,16 @@ class Goods(models.Model):
             delete_vector(self.id)
 
     def update_vector(self):
-        if self.check_by_embedding() and self.is_vector == False:
-            self.is_vector = True
-            self.save()
-        if self.has_image() and self.check_by_embedding() == False:
-            try:
+        if self.is_vector == False:
+            if self.check_by_embedding():
+                self.is_vector = True
+                self.save()
+            elif self.has_image() and self.check_by_embedding() == False:
                 image_path = self.image_path()
-                embedding = Goods.get_resnet_vector(image_path)
+                embedding = Goods.image_to_embedding(image_path)
                 save_vector(self.id, embedding)
                 self.is_vector = True
                 self.save()
-            except Exception as e:
-                print(e)
 
     def delete(self, *args, ** kwargs):
         if self.check_by_embedding():
@@ -115,8 +110,18 @@ class Goods(models.Model):
             return False
 
     @classmethod
-    def temp_image_path(cls, image_url):
+    def temp_image_path(cls, image_url, file_name=None):
         try:
+            temp_dir = os.path.join(settings.MEDIA_ROOT, 'temps')
+            os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
+            if file_name:
+                temp_path = os.path.join(temp_dir, file_name)
+                if os.path.exists(temp_path):
+                    print(f'file {temp_path} already exists, no request')
+                    return temp_path
+            else:
+                temp_path = os.path.join(temp_dir, f'{uuid.uuid4()}.jpg')
+
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
                 "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -129,9 +134,6 @@ class Goods(models.Model):
             }
             response = requests.get(image_url, timeout=10, headers=headers)
             response.raise_for_status()  # 检查请求是否成功
-            temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
-            os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
-            temp_path = os.path.join(temp_dir, f'{uuid.uuid4()}.jpg')
             with open(temp_path, 'wb') as destination:
                 destination.write(response.content)
             return temp_path
@@ -142,7 +144,7 @@ class Goods(models.Model):
 
     def image_path(self):
         if self.image_url is not None:
-            return Goods.temp_image_path(self.image_url)
+            return Goods.temp_image_path(self.image_url, file_name=f'goods_{self.id}.jpg')
         elif self.image and self.image.url:
             return self.image.path
 
@@ -174,48 +176,15 @@ class Goods(models.Model):
             (hit.entity.get("goods_id"), 1 - hit.distance)  # 转换相似度为分数
             for hit in results[0]
         ]
-
-
     @classmethod
-    def image_to_vector(cls, image_path):
-        base_model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
-        model = Model(inputs=base_model.input, outputs=base_model.output)
-        img = Image.open(image_path).convert('RGB')
-        img = img.resize((224, 224))  # ResNet的输入尺寸
-        img_array = np.array(img)
-        img_array = np.expand_dims(img_array, axis=0)
-        img_array = preprocess_input(img_array)  # 应用模型特定的预处理
-        # 提取特征向量
-        # print(model.summary())
-        vector = model.predict(img_array)
-        # vector_tensor = torch.from_numpy(vector).float()
-        # print("原始维度：", vector.shape)
-        # fc_layer = nn.Linear(2048, 512)
-        # reduced_vector = fc_layer(vector_tensor)
-        # print("降维：", reduced_vector.shape)
-        return vector.flatten().tolist()
-
-
-    @classmethod
-    def get_resnet_vector(cls, image_path):
-        # 加载模型
-        model = tmodels.resnet50(weights='IMAGENET1K_V2')
-        model = torch.nn.Sequential(*(list(model.children())[:-1]))
-        model.eval()
-        # 预处理
-        preprocess = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
-        img = Image.open(image_path).convert("RGB")
-        img_tensor = preprocess(img).unsqueeze(0)
-        # 提取特征
-        with torch.no_grad():
-            raw_features = model(img_tensor)
-        features_np = raw_features.squeeze().numpy()  # 输出形状 (2048,)
-        # L2 归一化（关键步骤）
-        normalized_features = features_np / np.linalg.norm(features_np)
-        # 转换为 Python list 格式（Milvus 要求）
-        return normalized_features.tolist()  # 最终格式: List[float]
+    def image_to_embedding(cls, image_path):
+        start = time.perf_counter()
+        if settings.EMBEDDING_MODEL == 'torch_mnv3':
+            from utils.model_torch_mnv3 import image_embedding as mnv3_embedding
+            embedding = mnv3_embedding(image_path)
+        else:
+            from utils.model_torch_resnet50 import image_embedding as trn50_embedding
+            embedding = trn50_embedding(image_path)
+        end = time.perf_counter()
+        print(f'model embedding time: {end - start}')
+        return embedding

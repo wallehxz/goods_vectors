@@ -1,6 +1,6 @@
 from celery import shared_task
 import json
-from goods.redis_client import get_redis_client
+from utils.redis_client import get_redis_client
 from django.core.serializers import serialize
 from django.core.serializers import deserialize
 import multiprocessing

@@ -97,9 +97,6 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://127.0.0.1:6379',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
     }
 }
 
@@ -218,3 +215,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Shanghai'  # 设置时区
 # django-celery-beat 配置
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# API Auth
+VERIFY_FLAG = 100
+
+# EMBEDDING_MODEL = 'torch_mnv3'
+# MILVUS_DATA = '960_collection'
+EMBEDDING_MODEL = '1'
+MILVUS_DATA = '1'

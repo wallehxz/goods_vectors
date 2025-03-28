@@ -2,7 +2,6 @@ import base64
 import json
 import uuid
 import os
-
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from goods.models import Goods
@@ -12,31 +11,18 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Case, When
+from utils.yolo_detect import image_objects
 
 
 def index(request):
     q = request.GET.get('q', '')
-    path = request.GET.get('image_path', '')
+    image_path = request.GET.get('image_path', '')
+    object_path = request.GET.get('object_path', '')
     if q != '':
         goods_list = Goods.objects.filter(name__contains=q).all()
-    elif path != '':
-        image_vector = cache.get(path)
-        if image_vector is None:
-            goods_list = []
-        else:
-            query_cache_key = f'query_{path}'
-            goods_list = cache.get(query_cache_key)
-            if goods_list is None:
-                milvus_results = Goods.similar_vectors(image_vector)
-                goods_ids, similarities = zip(*milvus_results)
-                goods_list = Goods.objects.filter(id__in=goods_ids).annotate(
-                    similarity=Case(
-                        *[When(id=goods_id, then=similarity) for goods_id, similarity in milvus_results],
-                        default=0.0
-                    )
-                ).order_by('similarity')
-                print(f'cached {len(goods_ids)} goods with vector {path}')
-                cache.set(query_cache_key, goods_list)
+    elif image_path != '' or object_path != '':
+        detect_objects = cache.get(request.session.get('image_uuid'))
+        goods_list, simi_index = image_query(request)
     else:
         goods_list = Goods.objects.all().order_by('-updated_at')
     paginator = Paginator(goods_list, 91)
@@ -45,12 +31,51 @@ def index(request):
     return render(request, 'index.html', locals())
 
 
+def image_query(request):
+    simi_index = {}
+    image_path = request.GET.get('image_path', '')
+    object_path = request.GET.get('object_path', '')
+    image_vector = cache.get(image_path)
+    if image_path != '':
+        image_vector = cache.get(image_path)
+        if image_vector is None:
+            return [], {}
+    elif object_path != '':
+        image_uuid = request.session.get('image_uuid')
+        if image_uuid is None:
+            return [], {}
+        cache_objects = cache.get(image_uuid)
+        if cache_objects is None:
+            return [], {}
+        obj_image_path = cache_objects.get(object_path)
+        image_vector = Goods.image_to_embedding(obj_image_path)
+    milvus_results = Goods.similar_vectors(image_vector)
+    simi_index = {str(key): int((1 - value) * 100) for key, value in milvus_results}
+    goods_ids, similarities = zip(*milvus_results)
+    goods_list = Goods.objects.filter(id__in=goods_ids).annotate(
+        similarity=Case(
+            *[When(id=goods_id, then=similarity) for goods_id, similarity in milvus_results],
+            default=0.0
+        )
+    ).order_by('similarity')
+    print(f'search {len(goods_ids)} goods with vector {image_path}')
+    return goods_list, simi_index
+
+
 @csrf_exempt
 def image_upload(request):
     uploaded_file = request.FILES.get('file', None)
     image_path = temp_upload(uploaded_file)
-    image_vector = Goods.get_resnet_vector(image_path)
-    # image_vector = Goods.image_to_vector(image_path)
+    objects_list = image_objects(image_path)
+    if objects_list:
+        if request.session.get('image_uuid') is None:
+            image_uuid = str(uuid.uuid4())
+            request.session['image_uuid'] = image_uuid
+        else:
+            image_uuid = request.session.get('image_uuid')
+        print('current image uuid: ', image_uuid)
+        cache.set(image_uuid, objects_list['objects_path'])
+    image_vector = Goods.image_to_embedding(image_path)
     if os.path.exists(image_path):
         print('删除临时文件:', image_path)
         os.remove(image_path)
@@ -60,7 +85,7 @@ def image_upload(request):
 
 
 def temp_upload(uploaded_file):
-    temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'temps')
     os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
     temp_path = os.path.join(temp_dir, uploaded_file.name)
     with open(temp_path, 'wb') as destination:
@@ -94,7 +119,7 @@ def image_to_vector(request):
         if verify_flag != settings.VERIFY_FLAG:
             return JsonResponse({"status": "Unauthorized"}, safe=False)
         file_path = decode_base64_file(data.get('image'))
-        image_vector = Goods.get_resnet_vector(file_path)
+        image_vector = Goods.image_to_embedding(file_path)
         return JsonResponse({"status": "success", "vector": image_vector}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
@@ -111,7 +136,7 @@ def goods_to_vectors(request):
         for good in goods_list:
             image_url = good.get('list_url')
             image_path = Goods.temp_image_path(image_url)
-            image_vector = Goods.get_resnet_vector(image_path)
+            image_vector = Goods.image_to_embedding(image_path)
             vector = {"id": good.get('id'), 'vector': image_vector}
             vectors_list.append(vector)
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
