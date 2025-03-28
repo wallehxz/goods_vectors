@@ -39,6 +39,18 @@ EMBEDDING_MODEL = '1'
 # 图片向量存储结合
 MILVUS_DATA = '1'
 
+# 缓存链接配置
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+    }
+}
+
+CELERY_BROKER_URL = 'redis://localhost:6379/2'  # Redis 作为消息代理
+
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'  # Redis 作为结果存储
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -102,17 +114,6 @@ DATABASES = {
         },
     }
 }
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-    }
-}
-
-CELERY_BROKER_URL = 'redis://localhost:6379/2'  # Redis 作为消息代理
-
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'  # Redis 作为结果存储
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
