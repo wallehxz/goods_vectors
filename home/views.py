@@ -16,6 +16,7 @@ from utils.yolo_detect import image_objects
 
 def index(request):
     q = request.GET.get('q', '')
+    yolo_model = cache.get('yolo_model', 'yolov8l-worldv2.pt')
     image_path = request.GET.get('image_path', '')
     object_path = request.GET.get('object_path', '')
     if q != '':
@@ -82,6 +83,13 @@ def image_upload(request):
     path = uuid.uuid4()
     cache.set(f'{path}', image_vector)
     return JsonResponse({"status": "success", "path": path}, safe=False)
+
+
+def set_yolo_model(request):
+    model_name = request.GET.get('model', '')
+    if model_name != '':
+        cache.set('yolo_model', model_name)
+        return JsonResponse({"status": "success", "model": model_name}, safe=False)
 
 
 def temp_upload(uploaded_file):

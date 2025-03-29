@@ -16,7 +16,121 @@
         <img class="brand" src="{% static 'images/logo.png' %}">
     </div>
     <div class="user-actions">
-        <span style="padding-right: 20px">登录/注册</span>
+        图片裁剪模型：
+        <select id="yoloSelect" class="model-select">
+            <option value="yolov8m-oiv7.pt" {% if yolo_model == 'yolov8m-oiv7.pt' %}selected{% endif %}>yolov8m-oiv7.pt
+                [50.3 MB]
+            </option>
+            <option value="yolov8m-seg.pt" {% if yolo_model == 'yolov8m-seg.pt' %}selected{% endif %}>yolov8m-seg.pt
+                [52.4
+                MB]
+            </option>
+            <option value="yolov8m-world.pt" {% if yolo_model == 'yolov8m-world.pt' %}selected{% endif %}>
+                yolov8m-world.pt
+                [55.9 MB]
+            </option>
+            <option value="yolov8m-worldv2.pt" {% if yolo_model == 'yolov8m-worldv2.pt' %}selected{% endif %}>
+                yolov8m-worldv2.pt [54.6 MB]
+            </option>
+            <option value="yolov8m.pt" {% if yolo_model == 'yolov8m.pt' %}selected{% endif %}>yolov8m.pt [49.7 MB]
+            </option>
+            <option value="yolov8l-oiv7.pt" {% if yolo_model == 'yolov8l-oiv7.pt' %}selected{% endif %}>yolov8l-oiv7.pt
+                [84.5 MB]
+            </option>
+            <option value="yolov8l-seg.pt" {% if yolo_model == 'yolov8l-seg.pt' %}selected{% endif %}>yolov8l-seg.pt
+                [88.1
+                MB]
+            </option>
+            <option value="yolov8l-world-cc3m.pt" {% if yolo_model == 'yolov8l-world-cc3m.pt' %}selected{% endif %}>
+                yolov8l-world-cc3m.pt [91.2 MB]
+            </option>
+            <option value="yolov8l-world.pt" {% if yolo_model == 'yolov8l-world.pt' %}selected{% endif %}>
+                yolov8l-world.pt
+                [91.2 MB]
+            </option>
+            <option value="yolov8l-worldv2-cc3m.pt" {% if yolo_model == 'yolov8l-worldv2-cc3m.pt' %}selected{% endif %}>
+                yolov8l-worldv2-cc3m.pt [89.9 MB]
+            </option>
+            <option value="yolov8l-worldv2.pt" {% if yolo_model == 'yolov8l-worldv2.pt' %}selected{% endif %}>
+                yolov8l-worldv2.pt [89.9 MB]
+            </option>
+            <option value="yolov8l.pt" {% if yolo_model == 'yolov8l.pt' %}selected{% endif %}>yolov8l.pt [83.7 MB]
+            </option>
+            <option value="yolov8x-oiv7.pt" {% if yolo_model == 'yolov8x-oiv7.pt' %}selected{% endif %}>yolov8x-oiv7.pt
+                [131
+                MB]
+            </option>
+            <option value="yolov8x-seg.pt" {% if yolo_model == 'yolov8x-seg.pt' %}selected{% endif %}>yolov8x-seg.pt
+                [137
+                MB]
+            </option>
+            <option value="yolov8x-world.pt" {% if yolo_model == 'yolov8x-world.pt' %}selected{% endif %}>
+                yolov8x-world.pt
+                [141 MB]
+            </option>
+            <option value="yolov8x-worldv2.pt" {% if yolo_model == 'yolov8x-worldv2.pt' %}selected{% endif %}>
+                yolov8x-worldv2.pt [140 MB]
+            </option>
+            <option value="yolov8x.pt" {% if yolo_model == 'yolov8x.pt' %}selected{% endif %}>yolov8x.pt [131 MB]
+            </option>
+            <option value="yolov8x6-500.pt" {% if yolo_model == 'yolov8x6-500.pt' %}selected{% endif %}>yolov8x6-500.pt
+                [187
+                MB]
+            </option>
+            <option value="yolov8x6-oiv7.pt" {% if yolo_model == 'yolov8x6-oiv7.pt' %}selected{% endif %}>
+                yolov8x6-oiv7.pt
+                [188 MB]
+            </option>
+            <option value="yolov8x6.pt" {% if yolo_model == 'yolov8x6.pt' %}selected{% endif %}>yolov8x6.pt [186 MB]
+            </option>
+            <option value="yolov9c-seg.pt" {% if yolo_model == 'yolov9c-seg.pt' %}selected{% endif %}>yolov9c-seg.pt
+                [53.9
+                MB]
+            </option>
+            <option value="yolov9c.pt" {% if yolo_model == 'yolov9c.pt' %}selected{% endif %}>yolov9c.pt [49.4 MB]
+            </option>
+            <option value="yolov9e-seg.pt" {% if yolo_model == 'yolov9e-seg.pt' %}selected{% endif %}>yolov9e-seg.pt
+                [117
+                MB]
+            </option>
+            <option value="yolov9e.pt" {% if yolo_model == 'yolov9e.pt' %}selected{% endif %}>yolov9e.pt [112 MB]
+            </option>
+            <option value="yolov9m.pt" {% if yolo_model == 'yolov9m.pt' %}selected{% endif %}>yolov9m.pt [39.1 MB]
+            </option>
+            <option value="yolov10b.pt" {% if yolo_model == 'yolov10b.pt' %}selected{% endif %}>yolov10b.pt [39.7 MB]
+            </option>
+            <option value="yolov10l.pt" {% if yolo_model == 'yolov10l.pt' %}selected{% endif %}>yolov10l.pt [50 MB]
+            </option>
+            <option value="yolov10m.pt" {% if yolo_model == 'yolov10m.pt' %}selected{% endif %}>yolov10m.pt [32.1 MB]
+            </option>
+            <option value="yolov10x.pt" {% if yolo_model == 'yolov10x.pt' %}selected{% endif %}>yolov10x.pt [61.4 MB]
+            </option>
+            <option value="yolo11m.pt" {% if yolo_model == 'yolo11m.pt' %}selected{% endif %}>yolo11m.pt [38.8 MB]
+            </option>
+            <option value="yolo11m-seg.pt" {% if yolo_model == 'yolo11m-seg.pt' %}selected{% endif %}>yolo11m-seg.pt
+                [43.3
+                MB]
+            </option>
+            <option value="yolo11l-seg.pt" {% if yolo_model == 'yolo11l-seg.pt' %}selected{% endif %}>yolo11l-seg.pt
+                [53.5
+                MB]
+            </option>
+            <option value="yolo11l.pt" {% if yolo_model == 'yolo11l.pt' %}selected{% endif %}>yolo11l.pt [49 MB]
+            </option>
+            <option value="yolo11x-seg.pt" {% if yolo_model == 'yolo11x-seg.pt' %}selected{% endif %}>yolo11x-seg.pt
+                [119
+                MB]
+            </option>
+            <option value="yolo11x.pt" {% if yolo_model == 'yolo11x.pt' %}selected{% endif %}>yolo11x.pt [109 MB]
+            </option>
+            <option value="yolo12m.pt" {% if yolo_model == 'yolo12m.pt' %}selected{% endif %}>yolo12m.pt [39 MB]
+            </option>
+            <option value="yolo12l.pt" {% if yolo_model == 'yolo12l.pt' %}selected{% endif %}>yolo12l.pt [51.2 MB]
+            </option>
+            <option value="yolo12x.pt" {% if yolo_model == 'yolo12x.pt' %}selected{% endif %}>yolo12x.pt [114 MB]
+            </option>
+        </select>
+        <a style="padding-right: 20px;padding-left: 20px;text-decoration: none;color: #FFFFFF" href="/admin">登录</a>
         <span style="padding-right: 20px">购物车</span>
     </div>
 </div>
@@ -31,13 +145,13 @@
         <input type="hidden" id="image_path" name="image_path" value="{{ path }}">
         <button id='submit_search' type="submit" class="button cw-icon"><i></i>搜索</button>
     </form>
-    <div class="status" id="status"></div>
+
 </div>
 
 <div class="detect-container">
     {% for key, value in detect_objects.items %}
-    <div class="image-wrapper">
-        <a href="?object_path={{ key }}">
+        <div class="image-wrapper">
+            <a href="?object_path={{ key }}">
                 <img src="{% media_url_path value %}" alt="图片1">
             </a>
         </div>
@@ -49,7 +163,7 @@
     {% if page_obj.has_previous %}
         <li class="page-item">
             <a class="page-link" href="?page=1" title="First">
-               首页
+                首页
             </a>
         </li>
         <li class="page-item">
@@ -75,7 +189,7 @@
         </li>
         <li class="page-item">
             <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" title="Last">
-               末页
+                末页
             </a>
         </li>
     {% endif %}
@@ -130,6 +244,12 @@
         } catch (error) {
             alert('图片解析向量服务异常');
         }
+    });
+
+    document.getElementById('yoloSelect').addEventListener('change', function () {
+        fetch(`/set_yolo_model?model=${this.value}`)
+            .then(response => response.json())
+            .then(data => console.log(data));
     });
 </script>
 </body>

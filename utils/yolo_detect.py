@@ -1,6 +1,7 @@
 import uuid
 from django.conf import settings
 from ultralytics import YOLO
+from django.core.cache import cache
 import cv2
 import os
 
@@ -8,7 +9,8 @@ import os
 def image_objects(image_path):
     output_dir = os.path.join(settings.MEDIA_ROOT, 'detects', f'{uuid.uuid4()}')
     os.makedirs(output_dir, exist_ok=True)
-    model = YOLO("yolov8m-world.pt")
+    yolo_model = cache.get('yolo_model', 'yolov8l-worldv2.pt')
+    model = YOLO(yolo_model)
     results = model(image_path)
     image = cv2.imread(image_path)
     detection_info = {

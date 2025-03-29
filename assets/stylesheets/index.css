@@ -203,3 +203,19 @@ body {
     opacity: 0.5;
     pointer-events: none;
 }
+
+.model-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  appearance: none; /* 隐藏默认箭头 */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23333"...</svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.model-select:focus {
+  border-color: #4d90fe;
+  outline: none;
+}

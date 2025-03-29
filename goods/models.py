@@ -88,12 +88,13 @@ class Goods(models.Model):
             if self.check_by_embedding():
                 self.is_vector = True
                 self.save()
-            elif self.has_image() and self.check_by_embedding() == False:
-                image_path = self.image_path()
-                embedding = Goods.image_to_embedding(image_path)
-                save_vector(self.id, embedding)
-                self.is_vector = True
-                self.save()
+        elif self.has_image() and self.check_by_embedding() == False:
+            image_path = self.image_path()
+            embedding = Goods.image_to_embedding(image_path)
+            save_vector(self.id, embedding)
+            self.is_vector = True
+            self.save()
+
 
     def delete(self, *args, ** kwargs):
         if self.check_by_embedding():
