@@ -1,16 +1,24 @@
-import uuid
-from django.conf import settings
-from ultralytics import YOLO
-from django.core.cache import cache
-import cv2
 import os
+import cv2
+import uuid
+from ultralytics import YOLO
+
+from django.conf import settings
+from cates.models import Category
+from django.core.cache import cache
 
 
 def image_objects(image_path):
     output_dir = os.path.join(settings.MEDIA_ROOT, 'detects', f'{uuid.uuid4()}')
     os.makedirs(output_dir, exist_ok=True)
-    yolo_model = cache.get('yolo_model', 'yolov8l-worldv2.pt')
+    yolo_model = cache.get('yolo_model', 'yolov8x-world.pt')
     model = YOLO(yolo_model)
+    if 'world' in yolo_model:
+        cates_list = cache.get('cates_list')
+        if cates_list is None:
+            cates_list = Category.get_categories()
+            cache.set('cates_list', cates_list, timeout=None)
+        model.set_classes(cates_list)
     results = model(image_path)
     image = cv2.imread(image_path)
     detection_info = {
@@ -41,4 +49,5 @@ def image_objects(image_path):
             'cropped_image_path': object_path
         })
     detection_info['total_objects'] = len(detection_info['detected_objects'])
+    print(f'{yolo_model} names total {len(results[0].names.values())}: ', results[0].names.values())
     return detection_info

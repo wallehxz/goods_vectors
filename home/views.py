@@ -16,7 +16,7 @@ from utils.yolo_detect import image_objects
 
 def index(request):
     q = request.GET.get('q', '')
-    yolo_model = cache.get('yolo_model', 'yolov8l-worldv2.pt')
+    yolo_model = cache.get('yolo_model', 'yolov8x-world.pt')
     image_path = request.GET.get('image_path', '')
     object_path = request.GET.get('object_path', '')
     if q != '':
@@ -28,6 +28,10 @@ def index(request):
         goods_list = Goods.objects.all().order_by('-updated_at')
     paginator = Paginator(goods_list, 91)
     page_number = request.GET.get('page', 1)
+    params = request.GET.copy()
+    if 'page' in params:
+        del params['page']
+    params = params.urlencode()
     page_obj = paginator.get_page(page_number)
     return render(request, 'index.html', locals())
 
@@ -78,7 +82,7 @@ def image_upload(request):
         cache.set(image_uuid, objects_list['objects_path'])
     image_vector = Goods.image_to_embedding(image_path)
     if os.path.exists(image_path):
-        print('删除临时文件:', image_path)
+        print('Delete temp image:', image_path)
         os.remove(image_path)
     path = uuid.uuid4()
     cache.set(f'{path}', image_vector)

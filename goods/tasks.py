@@ -16,8 +16,8 @@ def process_worker():
                 deserialized_objects = deserialize('json', json_data)
                 for obj in deserialized_objects:
                     goods = obj.object
-                    print(f"Process {multiprocessing.current_process().name} processing goods id: {goods.id}")
                     goods.update_vector()
+                    print(f"{multiprocessing.current_process().name} processing goods id: {goods.id}")
             else:
                 break
         except Exception as e:
@@ -30,7 +30,7 @@ def image_to_vector():
     cache = get_redis_client().client()
     print(f'Current un vector goods :{cache.llen("un_vector_list")}')
     if cache.llen('un_vector_list') == 0:
-        queryset = Goods.objects.filter(is_vector=False).all()
+        queryset = Goods.objects.all()
         serialized_objects = serialize('json', queryset)
         objects = json.loads(serialized_objects)
         with cache.pipeline() as pipe:

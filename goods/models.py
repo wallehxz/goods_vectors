@@ -91,9 +91,13 @@ class Goods(models.Model):
         elif self.has_image() and self.check_by_embedding() == False:
             image_path = self.image_path()
             embedding = Goods.image_to_embedding(image_path)
+            save_start = time.perf_counter()
             save_vector(self.id, embedding)
-            self.is_vector = True
-            self.save()
+            save_end = time.perf_counter()
+            print(f'save to milrus vector time: {save_end - save_start}')
+            if self.is_vector == False:
+                self.is_vector = True
+                self.save()
 
 
     def delete(self, *args, ** kwargs):
@@ -162,8 +166,12 @@ class Goods(models.Model):
 
     @classmethod
     def similar_vectors(cls, query_embedding, top_k=21):
-        # 搜索相似向量
-        search_params = {"metric_type": "COSINE", "params": {"nprobe": 128}}
+        # 搜索 HNSW 相似向量, ef 的数值 应为 大于 2 * top_k
+        # 搜索 IVF_FLAT 相似向量, nprobe 的数值 应为 nlist 的 5% ~ 10%
+        if settings.MILVUS_DATA == '960_collection':
+            search_params = {"metric_type": "COSINE", "params": {"ef": 64}}
+        else:
+            search_params = {"metric_type": "COSINE", "params": {"nprobe": 1024 }}
         collection.load()
         results = collection.search(
             data=[query_embedding],

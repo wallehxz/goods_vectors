@@ -31,13 +31,13 @@ ALLOWED_HOSTS = ['*']
 # API Auth
 VERIFY_FLAG = 100
 
-# EMBEDDING_MODEL = 'torch_mnv3'
-# MILVUS_DATA = '960_collection'
+EMBEDDING_MODEL = 'torch_mnv3'
+MILVUS_DATA = '960_collection'
 
 # 图片向量处理模型
-EMBEDDING_MODEL = '1'
+# EMBEDDING_MODEL = '1'
 # 图片向量存储结合
-MILVUS_DATA = '1'
+# MILVUS_DATA = '1'
 
 # 缓存链接配置
 CACHES = {
@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
     'goods.apps.GoodsConfig',
+    'cates.apps.CatesConfig',
     'home.apps.HomeConfig',
     'django_celery_beat',
 ]
@@ -168,13 +169,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLEUI_CONFIG = {
     'system_keep': False,
-    'menu_display': ['问答助手', '商品管理', '任务管理', '管理权限'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
+    'menu_display': ['品类管理', '商品管理', '任务管理', '管理权限'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
     'dynamic': True,    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时动态展示菜单内容
     'menus': [{
-        'name': '问答助手',
-        'icon': 'fas fa-solid fa-robot',
-        'url': 'https://yuanbao.tencent.com/',
-        'newTab': True,
+        'name': '品类管理',
+        'icon': 'fa fa-solid fa-bandage',
+        'url': 'cates/category',
     }, {
         'app': 'auth',
         'name': '管理权限',

@@ -8,13 +8,16 @@
 #### 推荐5个作用，milvus数据库连接池超过10个
 #### 图片转向量默认没有使用 TensorFlow keras 的库，如果需要请更改注释依赖,对应模型方法在 ultils/model_tf_resnet50.py
 #### 向量数据库需要依赖 docker docker-compose, 服务安装好以后，可以直接在 milvus 文件夹中启用
+#### 如果想要使用 显卡进行图片向量 识别，需要搭配 NVIDIA Cuda 12.1 版本
+#### CUDA Toolkit 12.1 https://developer.nvidia.com/cuda-12-1-1-download-archive
+#### cuDNN 9.1.1       https://developer.nvidia.com/cudnn-9-1-1-download-archive
 
 ```
     [{"title": '商品标题', "api_price": 100.10 ,"list_url": 'https://www.example.com/abc.jpg'}]
 ```
 #### 安装依赖库
+    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
     pip3 install -r requirements.txt
-
 
 #### 向量数据库
     cd milvus && sudo docker-compose up -d

@@ -162,12 +162,12 @@
 <ul class="pagination-cards">
     {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?page=1" title="First">
+            <a class="page-link" href="?page=1&{{ params }}" title="First">
                 首页
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" title="Previous">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ params }}" title="Previous">
                 上页
             </a>
         </li>
@@ -176,19 +176,19 @@
     {% for num in page_obj.paginator.page_range %}
         {% if num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                <a class="page-link" href="?page={{ num }}&{{ params }}">{{ num }}</a>
             </li>
         {% endif %}
     {% endfor %}
 
     {% if page_obj.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}" title="Next">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ params }}" title="Next">
                 下页
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" title="Last">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ params }}" title="Last">
                 末页
             </a>
         </li>
