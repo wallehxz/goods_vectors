@@ -137,7 +137,7 @@
 
 <div class="search-bar">
     <form action="/" method="get">
-        <input class="text" name="q" type="text" value="{{ q }}" placeholder="输入关键字搜索">
+        <input class="text" name="q" id='query' type="text" value="{{ q }}" placeholder="输入关键字搜索">
         <span class="photo-search-btn">
             <span class="upload-bg" onclick="document.getElementById('upload-image').click()"></span>
             <input type="file" id="upload-image" accept="image/*" style="display: none;">
@@ -220,6 +220,12 @@
 <script>
     const fileInput = document.getElementById('upload-image');
     const status = document.getElementById('status');
+    const queryInput = document.getElementById('query')
+    
+    queryInput.addEventListener('change', function(){
+         document.getElementById('image_path').disabled = true;
+        queryInput.disabled = false;
+    });
 
     fileInput.addEventListener('change', async (event) => {
         const file = event.target.files[0];
@@ -239,6 +245,7 @@
             if (response.ok) {
                 const result = await response.json();
                 document.getElementById('image_path').value = result.path;
+                document.getElementById('query').disabled = true;
                 document.getElementById('submit_search').click();
             }
         } catch (error) {
