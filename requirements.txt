@@ -17,3 +17,4 @@ django-celery-beat==2.7.0
 redis==3.5.3
 ultralytics==8.3.97
 opencv-python==4.11.0.86
+imagehash==4.3.2
