@@ -176,5 +176,26 @@ class Category(models.Model):
             Category(name="梳子", en_name="Comb"),
             Category(name="运动内衣", en_name="Sportswear"),
             Category(name="人", en_name="Person"),
+            Category(name="空调", en_name="Air Conditioner"),
             Category(name="乐高", en_name="Lego")
         ])
+
+
+class YoloTask(models.Model):
+    STATE = ((1, 'Pending'), (2, 'Training'), (3, 'Completed'), (4, 'Canceled'))
+
+    name = models.CharField(max_length=100, verbose_name='名称')
+    data_zip = models.FileField(upload_to='dataset/', verbose_name='数据集')
+    trained_model = models.FileField(upload_to='yolo_models', null=True, blank=True, verbose_name='微调模型')
+    status = models.IntegerField(choices=STATE, default=1, verbose_name='状态')
+    epochs = models.IntegerField(default=10, verbose_name='迭代轮次')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'yolo_tasks'
+        verbose_name = '模型微调'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name

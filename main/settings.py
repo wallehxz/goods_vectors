@@ -152,9 +152,8 @@ SIMPLEUI_FAVICON = '/assets/images/logo.png'
 STATIC_URL = '/assets/'
 # STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
-STATICFILES_DIRS = [
-    BASE_DIR / "assets",  # 确保你的静态文件存放在这里
-]
+# 确保你的静态文件存放在这里
+STATICFILES_DIRS = [BASE_DIR / "assets"]
 
 AUTH_USER_MODEL = 'account.Consumer'
 SIMPLEUI_STATIC_OFFLINE = True
@@ -169,12 +168,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLEUI_CONFIG = {
     'system_keep': False,
-    'menu_display': ['品类管理', '商品管理', '任务管理', '管理权限'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
+    'menu_display': ['品类管理', '模型微调', '商品管理', '任务管理', '管理权限', '下载训练文件'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
     'dynamic': True,    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时动态展示菜单内容
     'menus': [{
+        'name': '下载训练文件',
+        'icon': 'fa fa-solid fa-download',
+        'url': '/cates/yolo_task/down_datasets',
+        'target': '_blank',
+    }, {
         'name': '品类管理',
         'icon': 'fa fa-solid fa-bandage',
         'url': 'cates/category',
+    }, {
+        'name': '模型微调',
+        'icon': 'fa-solid fa-train',
+        'url': 'cates/yolotask',
     }, {
         'app': 'auth',
         'name': '管理权限',

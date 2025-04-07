@@ -18,6 +18,9 @@ Thumbs.db
 media/
 static/
 uploads/
+yolo_train/
+runs/
+train/
 
 # Database files
 *.sqlite3

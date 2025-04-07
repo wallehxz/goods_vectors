@@ -1,4 +1,4 @@
-## 商品图片向量搜索
+## 商品图片向量搜索；商品识别裁剪；识别模型训练优化
 
 #### 搭建框架 : Python3 Django, SQL: Postgresql, Cache: Redis, Server： Gunicorn
 #### 图片识别模型，ResNet50 模型，后台任务 Celery，向量数据库 Milvus, 图片检测：ultralytics YOLO
@@ -13,24 +13,31 @@
 #### 如果想要使用 显卡进行图片向量 识别，需要搭配 NVIDIA Cuda 12.1 版本
 #### CUDA Toolkit 12.1 https://developer.nvidia.com/cuda-12-1-1-download-archive
 #### cuDNN 9.1.1       https://developer.nvidia.com/cudnn-9-1-1-download-archive
+#### 由于预训练的模型识别物体有限，新增微调模型功能，对于新的物品，推荐使用 label-studio 进行图片标注导出，图片数量 300 - 500；
+#### 下载训练demo将图片已经标注文本放置到对应的目录，打包上传后可开始训练，完成后可以下载新的模型，添加新关键字可实现扩展
+#### label-studio https://labelstud.io/guide/quick_start
 
 ```
-    [{"title": '商品标题', "api_price": 100.10 ,"list_url": 'https://www.example.com/abc.jpg'}]
+    [{"title": '商品标题', "price": 100.00 ,"image_url": 'https://www.example.com/abc.jpg'}]
 ```
 #### 安装依赖库
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
     pip3 install -r requirements.txt
 
+#### 模型训练
+    https://docs.ultralytics.com/zh/modes/train/#usage-examples
+    yolo train data=dataset.yaml model=yolov11n.pt epochs=10 imgsz=640 batch=8 pretrained=True
+
 #### 向量数据库
     cd milvus && sudo docker-compose up -d
 
 #### 迁移数据库
-    python3.10 manage.py makemigrations
-    python3.10 manage.py migrate
+    python3.9 manage.py makemigrations
+    python3.9 manage.py migrate
 
 #### 初始化数据
     添加管理账号
-    python3.10 manage.py createsuperuser root
+    python3.9 manage.py createsuperuser root
     初始化图片类别 使用 python manage.py shell 执行
     Category.load_initial_data()
 
@@ -46,7 +53,7 @@
 
 #### 启动项目
 
-    python3.10 manage.py runserver
+    python3.9 manage.py runserver
     
     gunicorn main.wsgi:applitcation
 
