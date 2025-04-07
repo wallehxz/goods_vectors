@@ -3,16 +3,14 @@ import sys
 import shutil
 import zipfile
 import subprocess
-from pathlib import Path
 from django.contrib import admin
-from django.http import HttpResponse, FileResponse
+from django.http import FileResponse
 from django.shortcuts import redirect
 from cates.models import Category, YoloTask
 from django.urls import reverse
 from django.utils.html import format_html
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin import action
 
 
 def data_train(request, pk):
@@ -45,7 +43,7 @@ def data_train(request, pk):
                 print("Training on Windows")
                 windows_cmd = f'start cmd /c "conda activate {conda_env} && {command}"'
                 subprocess.run(windows_cmd, shell=True, check=True, cwd=dataset_dir)
-            elif sys.platform == "linux":
+            else:
                 print("Training on Linux")
                 command = f'yolo train model={trained_model} data=dataset.yaml epochs={task.epochs} imgsz=640 batch=8 pretrained=True'
                 screen_name = f"yolo_train_dataset"
