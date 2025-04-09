@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.conf import settings
 from django.contrib import messages
+from goods.tasks import check_train
+from django.core.cache import cache
 
 
 def data_train(request, pk):
@@ -43,16 +45,19 @@ def data_train(request, pk):
                 print("Training on Windows")
                 windows_cmd = f'start cmd /c "conda activate {conda_env} && {command}"'
                 subprocess.run(windows_cmd, shell=True, check=True, cwd=dataset_dir)
+                check_train.delay(task.id)
             else:
                 print("Training on Linux")
                 command = f'yolo train model={trained_model} data=dataset.yaml epochs={task.epochs} imgsz=640 batch=8 pretrained=True'
                 screen_name = f"yolo_train_dataset"
                 screen_cmd = f"screen -dmS {screen_name} bash -c 'cd {dataset_dir} && {command}'"
                 subprocess.run(screen_cmd, shell=True, check=True)
+                check_train.delay(task.id)
             task.status = 2
             task.save()
             messages.success(request, f"开始执行微调 {task.name} 数据，请耐心等待")
         except Exception as e:
+            print(f"Error: {e}")
             task.status = 4
             task.save()
     else:
@@ -61,14 +66,30 @@ def data_train(request, pk):
 
 
 def down_model(request, pk):
-    trained_path = os.path.join(settings.BASE_DIR, 'runs/detect/train/weights/best.pt')
+    if sys.platform == "win32":
+        trained_path = os.path.join(settings.BASE_DIR, 'runs/detect/train/weights/best.pt')
+    else:
+        trained_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/weights/best.pt')
     if os.path.exists(trained_path):
         response = FileResponse(open(trained_path, 'rb'))
-        response['Content-Disposition'] = 'attachment; filename="new_yolo_world.pt"'
+        response['Content-Disposition'] = 'attachment; filename="yolo_new_world.pt"'
         return response
     else:
         messages.error(request, f"新模型训练中，暂未完成，请耐心等待")
         return redirect(request.META.get('HTTP_REFERER', '/admin/'))
+
+
+def apply_model(request):
+    if sys.platform == "win32":
+        trained_path = os.path.join(settings.BASE_DIR, 'runs/detect/train/weights/best.pt')
+    else:
+        trained_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/weights/best.pt')
+    if os.path.exists(trained_path):
+        new_world_file = os.path.join(settings.BASE_DIR, 'yolo-new-world.pt')
+        shutil.copyfile(trained_path, new_world_file)
+        cache.set('yolo_model', 'yolo-new-world.pt', timeout=0)
+    messages.success(request, f"新模型应用成功")
+    return redirect(request.META.get('HTTP_REFERER', '/admin/'))
 
 
 def down_datasets(request):
@@ -95,11 +116,10 @@ class YoloTaskAdmin(admin.ModelAdmin):
                 '<a class="el-button el-button--warning el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-cpu"></i> 训练</a> ',
                 reverse('data_train', args=[obj.pk])
             )
-        elif obj.status == 2:
-            return format_html(
-                '<a class="el-button el-button--success el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-download"></i> 下载</a> ',
-                reverse('down_model', args=[obj.pk])
-            )
+        elif obj.status == 3:
+            down_link = format_html('<a class="el-button el-button--success el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-download"></i> 下载</a> ',reverse('down_model', args=[obj.pk]))
+            apply_link = format_html('<a class="el-button el-button--danger el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-hand"></i> 应用</a> ', reverse('apply_model'))
+            return format_html('{} {}', down_link, apply_link)
 
     custom_actions.short_description = '操作'  # 列标题
 # Register your models here.

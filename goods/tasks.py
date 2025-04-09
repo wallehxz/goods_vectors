@@ -1,5 +1,10 @@
+import time
+
 from celery import shared_task
 import json
+import sys
+import os
+from django.conf import settings
 from utils.redis_client import get_redis_client
 from django.core.serializers import serialize
 from django.core.serializers import deserialize
@@ -47,3 +52,49 @@ def image_to_vector():
 
     for process in processes:
         process.join()
+
+
+@shared_task
+def check_train(task_id):
+    from cates.models import YoloTask
+    task = YoloTask.objects.get(id=task_id)
+    if task.status == 2:
+        if sys.platform == 'win32':
+            # runs/detect/train/weights/best.pt
+            train_path = os.path.join(settings.BASE_DIR, 'runs/detect/train')
+        else:
+            # yolo_train/datasets/runs/detect/train/weights/best.pt
+            train_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/')
+        timeout_seconds = 5 * 60
+        last_file_count = len(os.listdir(train_path))
+        last_activity_time = time.time()
+        try:
+            while True:
+                current_file_count = len(os.listdir(train_path))
+                # 如果文件数量增加，重置计时器
+                if current_file_count > last_file_count:
+                    print(f"new file! count: {current_file_count}")
+                    last_file_count = current_file_count
+                    last_activity_time = time.time()
+                # 检查是否超时
+                elapsed_time = time.time() - last_activity_time
+                if elapsed_time >= timeout_seconds:
+                    print(f"5 minute no new file build")
+                    break
+                time.sleep(30)
+        except Exception as e:
+            print(f"Error: {e}")
+        if sys.platform == 'win32':
+            best_file_path = os.path.join(settings.BASE_DIR, 'runs/detect/train/weights/best.pt')
+        else:
+            best_file_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/weights/best.pt')
+        if os.path.exists(best_file_path):
+            task.status = 3
+            task.save()
+        else:
+            task.status = 4
+            task.save()
+        return 'train check complete！'
+
+
+

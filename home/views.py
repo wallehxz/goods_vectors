@@ -16,6 +16,12 @@ from utils.yolo_detect import image_objects
 
 def index(request):
     q = request.GET.get('q', '')
+    if os.path.exists(os.path.join(settings.BASE_DIR, 'yolo-new-world.pt')):
+        trained_model = True
+        size_bytes = os.path.getsize(os.path.join(settings.BASE_DIR, 'yolo-new-world.pt'))
+        trained_size = int(size_bytes / (1024 * 1024))
+    else:
+        trained_model = False
     yolo_model = cache.get('yolo_model', 'yolov8x-world.pt')
     image_path = request.GET.get('image_path', '')
     object_path = request.GET.get('object_path', '')
@@ -92,7 +98,7 @@ def image_upload(request):
 def set_yolo_model(request):
     model_name = request.GET.get('model', '')
     if model_name != '':
-        cache.set('yolo_model', model_name)
+        cache.set('yolo_model', model_name, timeout=0)
         return JsonResponse({"status": "success", "model": model_name}, safe=False)
 
 
