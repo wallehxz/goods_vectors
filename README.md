@@ -14,7 +14,7 @@
 #### CUDA Toolkit 12.1 https://developer.nvidia.com/cuda-12-1-1-download-archive
 #### cuDNN 9.1.1       https://developer.nvidia.com/cudnn-9-1-1-download-archive
 #### 由于预训练的模型识别物体有限，新增微调模型功能，对于新的物品，推荐使用 label-studio 进行图片标注导出，图片数量 300 - 500；
-#### 下载训练demo将图片已经标注文本放置到对应的目录，打包上传后可开始训练，完成后可以下载新的模型，添加新关键字可实现扩展
+#### 导出的数据格式 Yolo image，可以直接上传模型训练，会自动构建文件包
 #### label-studio https://labelstud.io/guide/quick_start
 
 ```
