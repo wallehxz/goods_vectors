@@ -1,0 +1,15 @@
+{% extends 'admin/change_list.html' %}
+{% block object-tools-items %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let addItemButtons = document.querySelectorAll('[data-name="add_item"]');
+            addItemButtons.forEach(function (button) {
+                button.style.display = 'none';
+            });
+            let deleteButtons = document.querySelectorAll('[data-name="delete_selected"]');
+            deleteButtons.forEach(function (button) {
+                button.style.display = 'none';
+            });
+        });
+    </script>
+{% endblock %}

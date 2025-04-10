@@ -1,5 +1,5 @@
 import time
-
+from datetime import datetime
 from celery import shared_task
 import json
 import sys
@@ -9,6 +9,7 @@ from utils.redis_client import get_redis_client
 from django.core.serializers import serialize
 from django.core.serializers import deserialize
 import multiprocessing
+from goods.models import Goods
 
 
 def process_worker():
@@ -95,6 +96,25 @@ def check_train(task_id):
             task.status = 4
             task.save()
         return 'train check complete！'
+
+
+@shared_task
+def download_image():
+    cache = get_redis_client().client()
+    if cache.llen('download_products') > 0:
+        print(f'Prepare to download {cache.llen("download_products")} image')
+        date_str = datetime.now().strftime("%Y%m%d")
+        base_dir = f'products/{date_str}'
+        store_dir = os.path.join(settings.MEDIA_ROOT, base_dir)
+        os.makedirs(store_dir, exist_ok=True)
+        while True:
+            img_url = cache.lpop('download_products')
+            if img_url:
+                next_num = len(os.listdir(store_dir)) + 1
+                format_jpg = "{:08d}.jpg".format(next_num)
+                Goods.temp_image_path(img_url, format_jpg, base_dir)
+            else:
+                break
 
 
 

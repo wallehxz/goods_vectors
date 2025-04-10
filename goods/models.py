@@ -43,7 +43,7 @@ class Goods(models.Model):
 
     class Meta:
         db_table = 'goods'
-        verbose_name = '商品表'
+        verbose_name = '商品'
         verbose_name_plural = verbose_name
 
         indexes = [
@@ -115,9 +115,9 @@ class Goods(models.Model):
             return False
 
     @classmethod
-    def temp_image_path(cls, image_url, file_name=None):
+    def temp_image_path(cls, image_url, file_name=None, base_dir='temps'):
         try:
-            temp_dir = os.path.join(settings.MEDIA_ROOT, 'temps')
+            temp_dir = os.path.join(settings.MEDIA_ROOT, base_dir)
             os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
             if file_name:
                 temp_path = os.path.join(temp_dir, file_name)
@@ -197,3 +197,16 @@ class Goods(models.Model):
         end = time.perf_counter()
         print(f'model embedding time: {end - start}')
         return embedding
+
+
+class Product(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255, verbose_name='标题')
+    list_url = models.CharField(max_length=350, verbose_name='图片')
+    api_price = models.FloatField(verbose_name='价格')
+
+    class Meta:
+        managed = False
+        db_table = 'product'
+        verbose_name = '图片'
+        verbose_name_plural = verbose_name

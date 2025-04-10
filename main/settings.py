@@ -47,9 +47,9 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/2'  # Redis 作为消息代理
+CELERY_BROKER_URL = 'redis://localhost:6379/1'  # Redis 作为消息代理
 
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'  # Redis 作为结果存储
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'  # Redis 作为结果存储
 
 # Application definition
 
@@ -113,6 +113,17 @@ DATABASES = {
         'OPTIONS': {
             'client_encoding': 'UTF8',  # 确保客户端使用 UTF-8
         },
+    },
+    'mysql_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'weigou123',
+        'USER': 'cmuser',
+        'PASSWORD': 'A6NZ!pe3a1VqAVQAD',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        }
     }
 }
 
@@ -168,19 +179,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLEUI_CONFIG = {
     'system_keep': False,
-    'menu_display': ['品类管理', '模型微调', '商品管理', '任务管理', '管理权限', '下载训练文件'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
+    'menu_display': ['图片集市', '品类识别', '模型训练', '商品管理', '任务管理', '管理权限'],      # 开启排序和过滤功能, 不填此字段为默认排序和全部显示, 空列表[] 为全部不显示.
     'dynamic': True,    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时动态展示菜单内容
     'menus': [{
-        'name': '下载训练文件',
-        'icon': 'fa fa-solid fa-download',
-        'url': '/cates/yolo_task/down_datasets',
-        'target': '_blank',
+        'name': '图片集市',
+        'icon': 'fa fa-solid fa-whiskey-glass',
+        'url': 'goods/product',
     }, {
-        'name': '品类管理',
-        'icon': 'fa fa-solid fa-bandage',
+        'name': '品类识别',
+        'icon': 'fa fa-solid fa-filter-circle-xmark',
         'url': 'cates/category',
     }, {
-        'name': '模型微调',
+        'name': '模型训练',
         'icon': 'fa-solid fa-train',
         'url': 'cates/yolotask',
     }, {

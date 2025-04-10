@@ -1,9 +1,12 @@
 import json
 from django.contrib import admin
+from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.html import format_html
 from simpleui.admin import AjaxAdmin
-from goods.models import Goods
+from utils.redis_client import get_redis_client
+from goods.models import Goods, Product
+from goods.tasks import download_image
 
 admin.site.site_header = '商品管理后台'
 admin.site.site_title = '商品管理后台'
@@ -70,4 +73,40 @@ class GoodsAdmin(AjaxAdmin):
             'label': '文件'
         }]
     }
+
+
+@admin.register(Product)
+class ProductAdmin(AjaxAdmin):
+    list_display = ('title', 'preview')
+    search_fields = ['title']
+    change_list_template = 'admin/goods/product/change_list.html'
+    actions = ['download_selected']
+
+    def get_list_display_links(self, request, list_display):
+        return None
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).using('mysql_db')
+
+    def preview(self, obj):
+        if obj.list_url:
+            return format_html('<img src="{}" width="75" height="75">', obj.list_url)
+        else:
+            return '--'
+
+    preview.short_description = '预览'
+
+    def download_selected(self, request, queryset):
+        cache = get_redis_client().client()
+        with cache.pipeline() as pipe:
+            for obj in queryset:
+                pipe.rpush('download_products', obj.list_url)
+            pipe.execute()
+        messages.success(request, f'{len(queryset)} 张商品图片已加入下载队列 <br> 当前图片总数：{cache.llen("download_products")}')
+        cache.expire('download_products', 60 * 60 * 24)
+        download_image.delay()
+
+    download_selected.short_description = '下载图片'
+    download_selected.icon = 'el-icon-download'
+
 # Register your models here.
