@@ -88,11 +88,7 @@ def check_train(task_id):
                 time.sleep(30)
         except Exception as e:
             print(f"Error: {e}")
-        if sys.platform == 'win32':
-            best_file_path = os.path.join(settings.BASE_DIR, 'runs/detect/train/weights/best.pt')
-        else:
-            best_file_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/weights/best.pt')
-        if os.path.exists(best_file_path):
+        if len(os.listdir(train_path)) > 2:
             task.status = 3
             task.save()
         else:

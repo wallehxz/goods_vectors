@@ -142,7 +142,7 @@ class YoloTaskAdmin(admin.ModelAdmin):
             )
         elif obj.status == 3:
             down_link = format_html('<a class="el-button el-button--success el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-download"></i> 下载</a> ',reverse('down_model', args=[obj.pk]))
-            apply_link = format_html('<a class="el-button el-button--danger el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-hand"></i> 应用</a> ', reverse('apply_model'))
+            apply_link = format_html('<a class="el-button el-button--danger el-button--mini" href="{}" style="color: white !important;padding: 4px 5px;"><i class="el-icon-setting"></i> 应用</a> ', reverse('apply_model'))
             return format_html('{} {}', down_link, apply_link)
 
     custom_actions.short_description = '操作'  # 列标题
