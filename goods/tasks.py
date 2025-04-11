@@ -69,7 +69,7 @@ def check_train(task_id):
         if not os.path.exists(train_path):
             print(f"train path not build，Wait 30 seconds")
             time.sleep(30)
-        timeout_seconds = 5 * 60
+        timeout_seconds = 10 * 60
         last_file_count = len(os.listdir(train_path))
         last_activity_time = time.time()
         try:
@@ -83,9 +83,9 @@ def check_train(task_id):
                 # 检查是否超时
                 elapsed_time = time.time() - last_activity_time
                 if elapsed_time >= timeout_seconds:
-                    print(f"5 minute no new file build")
+                    print(f"10 minute no new file build")
                     break
-                time.sleep(30)
+                time.sleep(60)
         except Exception as e:
             print(f"Error: {e}")
         if len(os.listdir(train_path)) > 2:
