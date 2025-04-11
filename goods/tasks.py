@@ -65,7 +65,10 @@ def check_train(task_id):
             train_path = os.path.join(settings.BASE_DIR, 'runs/detect/train')
         else:
             # yolo_train/datasets/runs/detect/train/weights/best.pt
-            train_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/')
+            train_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train')
+        if not os.path.exists(train_path):
+            print(f"train path not build，Wait 30 seconds")
+            time.sleep(30)
         timeout_seconds = 5 * 60
         last_file_count = len(os.listdir(train_path))
         last_activity_time = time.time()
