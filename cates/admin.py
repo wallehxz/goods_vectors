@@ -3,7 +3,6 @@ import sys
 import shutil
 import zipfile
 import subprocess
-
 import yaml
 from django.contrib import admin
 from django.http import FileResponse
@@ -39,6 +38,7 @@ def data_train(task):
             screen_cmd = f"screen -dmS {screen_name} bash -c 'cd {dataset_dir} && {command}'"
             subprocess.run(screen_cmd, shell=True, check=True)
             check_train.delay(task.id)
+        YoloTask.objects.exclude(id=task.id).filter(status__in=[2, 3]).update(status=4)
         task.status = 2
         task.save()
     except Exception as e:

@@ -67,8 +67,8 @@ def check_train(task_id):
             # yolo_train/datasets/runs/detect/train/weights/best.pt
             train_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train')
         if not os.path.exists(train_path):
-            print(f"train path not build，Wait 30 seconds")
-            time.sleep(30)
+            print(f"train path not build，Wait 15 seconds")
+            time.sleep(15)
         timeout_seconds = 10 * 60
         last_file_count = len(os.listdir(train_path))
         last_activity_time = time.time()
@@ -76,6 +76,7 @@ def check_train(task_id):
             while True:
                 current_file_count = len(os.listdir(train_path))
                 # 如果文件数量增加，重置计时器
+                train_complete = False
                 if current_file_count > last_file_count:
                     print(f"new file! count: {current_file_count}")
                     last_file_count = current_file_count
@@ -85,7 +86,14 @@ def check_train(task_id):
                 if elapsed_time >= timeout_seconds:
                     print(f"10 minute no new file build")
                     break
-                time.sleep(60)
+                for root, _, files in os.walk(train_path):
+                    if 'best.pt' in files:
+                        print('best.pt generate Training complete')
+                        train_complete = True
+                        break
+                if train_complete:
+                    break
+                time.sleep(30)
         except Exception as e:
             print(f"Error: {e}")
         if len(os.listdir(train_path)) > 2:
@@ -94,7 +102,7 @@ def check_train(task_id):
         else:
             task.status = 4
             task.save()
-        return 'train check complete！'
+        return True
 
 
 @shared_task
