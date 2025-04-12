@@ -5,6 +5,7 @@ from django.db import models
 class Category(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True, verbose_name='名称')
     en_name = models.CharField(max_length=100, null=True, blank=True, verbose_name='英文')
+    extra = models.TextField(null=True, blank=True,verbose_name='扩展')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -17,8 +18,14 @@ class Category(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        cache.set('cates_list', Category.get_categories(), timeout=None)
+        if ',' in self.extra:
+            cate_list = []
+            for item in self.extra.split(','):
+                cate_list.append(Category(name=item, en_name=item))
+            Category.objects.bulk_create(cate_list)
+        else:
+            super().save(*args, **kwargs)
+        cache.set('cate_list', None)
 
     @classmethod
     def get_categories(cls):

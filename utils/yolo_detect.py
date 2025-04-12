@@ -17,12 +17,17 @@ def image_objects(image_path):
     yolo_model = cache.get('yolo_model', 'yolov8x-world.pt')
     model = YOLO(yolo_model)
     if 'world' in yolo_model:
-        cates_list = cache.get('cates_list')
-        if cates_list is None:
-            cates_list = Category.get_categories()
-            cache.set('cates_list', cates_list, timeout=None)
-        model.set_classes(cates_list)
+        cache_list = cache.get('cate_list')
+        if cache_list is None:
+            model_list = list(model.names.values())
+            cate_list = Category.get_categories()
+            cache_list = list(set(model_list + cate_list))
+            cache.set('cate_list', cache_list, timeout=None)
+        model.set_classes(cache_list)
     results = model(image_path)
+    if len(results[0].boxes) == 0:
+        model = YOLO('yolov8x-oiv7.pt')
+        results = model(image_path)
     image = cv2.imread(image_path)
     detection_info = {
         'original_image': image_path,

@@ -98,7 +98,7 @@ def image_upload(request):
 def set_yolo_model(request):
     model_name = request.GET.get('model', '')
     if model_name != '':
-        cache.set('yolo_model', model_name, timeout=0)
+        cache.set('yolo_model', model_name, timeout=None)
         return JsonResponse({"status": "success", "model": model_name}, safe=False)
 
 

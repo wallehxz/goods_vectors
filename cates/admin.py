@@ -26,7 +26,7 @@ def data_train(task):
         else:
             trained_model = default_model
         if sys.platform == "win32":
-            command = f'yolo train model={trained_model} data=dataset.yaml epochs={task.epochs} imgsz=640 batch=8 pretrained=True workers=0'
+            command = f'yolo train model={trained_model} data=dataset.yaml epochs={task.epochs} imgsz=640 batch=8 pretrained=True workers=0 lr0=0.0001 freeze=10'
             print("Training on Windows")
             windows_cmd = f'start cmd /c "conda activate {conda_env} && {command}"'
             subprocess.run(windows_cmd, shell=True, check=True, cwd=dataset_dir)
@@ -118,7 +118,7 @@ def apply_model(request):
     if os.path.exists(trained_path):
         new_world_file = os.path.join(settings.BASE_DIR, 'yolo-new-world.pt')
         shutil.copyfile(trained_path, new_world_file)
-        cache.set('yolo_model', 'yolo-new-world.pt', timeout=0)
+        cache.set('yolo_model', 'yolo-new-world.pt')
     messages.success(request, f"新模型应用成功")
     return redirect(request.META.get('HTTP_REFERER', '/admin/'))
 
