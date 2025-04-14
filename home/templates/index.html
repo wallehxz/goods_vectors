@@ -19,7 +19,7 @@
         图片裁剪模型：
         <select id="yoloSelect" class="model-select">
             {% if trained_model %}
-            <option value="yolo-new-world.pt" {% if yolo_model == 'yolo-new-world.pt' %}selected{% endif %}>新微调模型
+            <option value="yolo-best.pt" {% if yolo_model == 'yolo-best.pt' %}selected{% endif %}>新微调模型
                 [{{ trained_size }} MB]
             </option>
             {% endif %}

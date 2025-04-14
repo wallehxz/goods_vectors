@@ -20,13 +20,13 @@ def data_train(task):
     try:
         dataset_dir = os.path.join(settings.BASE_DIR, 'yolo_train', 'datasets')
         conda_env = "goods_vectors"
-        default_model = os.path.join(settings.BASE_DIR, 'yolov8x-world.pt')
+        default_model = os.path.join(settings.BASE_DIR, 'yolo11s.pt')
         if task.trained_model and task.trained_model.path:
             trained_model = task.trained_model.path
         else:
             trained_model = default_model
         if sys.platform == "win32":
-            command = f'yolo train model={trained_model} data=dataset.yaml epochs={task.epochs} imgsz=640 batch=8 pretrained=True workers=0 lr0=0.0001 freeze=10'
+            command = f'yolo train model={trained_model} data=dataset.yaml epochs={task.epochs} imgsz=640 batch=8 pretrained=True workers=0'
             print("Training on Windows")
             windows_cmd = f'start cmd /c "conda activate {conda_env} && {command}"'
             subprocess.run(windows_cmd, shell=True, check=True, cwd=dataset_dir)
@@ -58,27 +58,42 @@ def build_train(request, pk):
         os.makedirs(datasets_dir, exist_ok=True)
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
-        sub_dirs = ['train', 'val']
+        or_labels_dir = os.path.join(extract_dir, 'labels')
+        from ultralytics import YOLO
+        default_model = os.path.join(settings.BASE_DIR, 'yolo11s.pt')
+        if task.trained_model and task.trained_model.path:
+            trained_model = task.trained_model.path
+        else:
+            trained_model = default_model
+        model = YOLO(trained_model)
+        model_names = list(model.names.values())
+        names_count = len(model_names)
+        rename_class_number(names_count, or_labels_dir)
+        sub_dirs = ['train', 'validation']
         ori_images_dir = os.path.join(extract_dir, 'images')
         ori_labels_dir = os.path.join(extract_dir, 'labels')
         for sub in sub_dirs:
-            images_dir = os.path.join(datasets_dir, 'images', sub)
+            images_dir = os.path.join(datasets_dir,sub, 'images')
             os.makedirs(images_dir, exist_ok=True)
             copy_all_files(ori_images_dir, images_dir)
-            labels_dir = os.path.join(datasets_dir, 'labels', sub)
+            labels_dir = os.path.join(datasets_dir, sub, 'labels')
             os.makedirs(labels_dir, exist_ok=True)
             copy_all_files(ori_labels_dir, labels_dir)
-        dataset = {"path": "../", "train": "images/train", "val": "images/val"}
+        dataset = {"path": "../", "train": "train/images", "val": "validation/images"}
         if sys.platform == "win32":
             dataset['path'] = '../goods_vectors/yolo_train/datasets/'
             runs_path = os.path.join(settings.BASE_DIR, 'runs')
             if os.path.exists(runs_path):
                 shutil.rmtree(runs_path)
         names = {}
+        for num, model_name in enumerate(model_names):
+            names[num] = model_name
         with open(os.path.join(extract_dir, 'classes.txt'), 'r') as f:
             for number, line in enumerate(f):
-                names[number] = line.strip()
+                cur_number = number + names_count
+                names[cur_number] = line.strip()
         dataset['names'] = names
+        dataset['nc'] = len(names)
         dataset_yaml = os.path.join(datasets_dir, 'dataset.yaml')
         with open(dataset_yaml, "w", encoding="utf-8") as f:
             yaml.dump(dataset, f, default_flow_style=False, sort_keys=False)
@@ -86,6 +101,22 @@ def build_train(request, pk):
         data_train(task)
     messages.success(request, f"开始训练模型中，请耐心等待...")
     return redirect(request.META.get('HTTP_REFERER', '/admin/'))
+
+
+def rename_class_number(base_number, labels_dir):
+    for item in os.listdir(labels_dir):
+        label_path = os.path.join(labels_dir, item)
+        with open(label_path, 'r') as f:
+            lines = f.readlines()
+        modified_lines = []
+        for line in lines:
+            parts = line.strip().split()
+            if len(parts) >= 5:
+                parts[0] = str(base_number + int(parts[0]))
+                modified_line = ' '.join(parts) + '\n'
+                modified_lines.append(modified_line)
+        with open(label_path, 'w') as f:
+            f.writelines(modified_lines)
 
 
 def copy_all_files(src_folder, dst_folder):
@@ -116,9 +147,9 @@ def apply_model(request):
     else:
         trained_path = os.path.join(settings.BASE_DIR, 'yolo_train/datasets/runs/detect/train/weights/best.pt')
     if os.path.exists(trained_path):
-        new_world_file = os.path.join(settings.BASE_DIR, 'yolo-new-world.pt')
+        new_world_file = os.path.join(settings.BASE_DIR, 'yolo-best.pt')
         shutil.copyfile(trained_path, new_world_file)
-        cache.set('yolo_model', 'yolo-new-world.pt')
+        cache.set('yolo_model', 'yolo-best.pt')
     messages.success(request, f"新模型应用成功")
     return redirect(request.META.get('HTTP_REFERER', '/admin/'))
 

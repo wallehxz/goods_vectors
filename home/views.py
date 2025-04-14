@@ -16,9 +16,9 @@ from utils.yolo_detect import image_objects
 
 def index(request):
     q = request.GET.get('q', '')
-    if os.path.exists(os.path.join(settings.BASE_DIR, 'yolo-new-world.pt')):
+    if os.path.exists(os.path.join(settings.BASE_DIR, 'yolo-best.pt')):
         trained_model = True
-        size_bytes = os.path.getsize(os.path.join(settings.BASE_DIR, 'yolo-new-world.pt'))
+        size_bytes = os.path.getsize(os.path.join(settings.BASE_DIR, 'yolo-best.pt'))
         trained_size = int(size_bytes / (1024 * 1024))
     else:
         trained_model = False
