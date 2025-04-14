@@ -4,7 +4,7 @@ from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True, verbose_name='名称')
-    en_name = models.CharField(max_length=100, null=True, blank=True, verbose_name='英文')
+    en_name = models.CharField(max_length=100, null=True, blank=True, unique=True, verbose_name='英文')
     extra = models.TextField(null=True, blank=True,verbose_name='扩展')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
@@ -21,8 +21,12 @@ class Category(models.Model):
         if ',' in self.extra:
             cate_list = []
             for item in self.extra.split(','):
-                cate_list.append(Category(name=item, en_name=item))
-            Category.objects.bulk_create(cate_list)
+                cate = item.strip().lower()
+                existing_categories = set(Category.objects.values_list('en_name', flat=True))
+                if cate not in existing_categories:
+                    cate_list.append(Category(name=cate, en_name=cate))
+            if len(cate_list) > 0:
+                Category.objects.bulk_create(cate_list)
         else:
             super().save(*args, **kwargs)
         cache.set('cate_list', None)
