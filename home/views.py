@@ -129,6 +129,13 @@ def decode_base64_file(data):
     raise ValueError("无效的 base64 文件数据")
 
 
+def image_to_base64(image_path):
+    pre_head = 'data:image/jpeg;base64,'
+    with open(image_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+    return pre_head + encoded_string
+
+
 @csrf_exempt
 def image_to_vector(request):
     if request.method == 'POST':
@@ -138,7 +145,12 @@ def image_to_vector(request):
             return JsonResponse({"status": "Unauthorized"}, safe=False)
         file_path = decode_base64_file(data.get('image'))
         image_vector = Goods.image_to_embedding(file_path)
-        return JsonResponse({"status": "success", "vector": image_vector}, safe=False)
+        objects_path = image_objects(file_path)['objects_path']
+        objects_list = []
+        for obj, img_path in objects_path.items():
+            obj_img = {'object': os.path.basename(img_path), 'base64_str': image_to_base64(img_path), 'vector': Goods.image_to_embedding(img_path)}
+            objects_list.append(obj_img)
+        return JsonResponse({"status": "success", "vector": image_vector, "objects": objects_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
 
