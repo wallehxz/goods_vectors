@@ -145,11 +145,13 @@ def image_to_vector(request):
             return JsonResponse({"status": "Unauthorized"}, safe=False)
         file_path = decode_base64_file(data.get('image'))
         image_vector = Goods.image_to_embedding(file_path)
-        objects_path = image_objects(file_path)['objects_path']
+        yolo_object = data.get('yolo', 1)
         objects_list = []
-        for obj, img_path in objects_path.items():
-            obj_img = {'object': os.path.basename(img_path), 'base64_str': image_to_base64(img_path), 'vector': Goods.image_to_embedding(img_path)}
-            objects_list.append(obj_img)
+        if yolo_object == 1:
+            objects_path = image_objects(file_path)['objects_path']
+            for obj, img_path in objects_path.items():
+                obj_img = {'object': os.path.basename(img_path), 'base64_str': image_to_base64(img_path), 'vector': Goods.image_to_embedding(img_path)}
+                objects_list.append(obj_img)
         return JsonResponse({"status": "success", "vector": image_vector, "objects": objects_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
