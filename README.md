@@ -22,6 +22,8 @@
 ```
 #### 安装依赖库
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+    pip install ftfy regex tqdm
+    pip install git+https://gitee.com/zalle/clip.git
     pip3 install -r requirements.txt
 
 #### 模型训练
