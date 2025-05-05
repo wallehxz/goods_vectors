@@ -2,6 +2,7 @@ import base64
 import json
 import uuid
 import os
+import time
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from goods.models import Goods
