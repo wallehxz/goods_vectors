@@ -148,10 +148,13 @@ def image_to_vector(request):
         yolo_object = data.get('yolo', 1)
         objects_list = []
         if yolo_object == 1:
+            start_yolo = time.perf_counter()
             objects_path = image_objects(file_path)['objects_path']
             for obj, img_path in objects_path.items():
                 obj_img = {'object': os.path.basename(img_path), 'base64_str': image_to_base64(img_path), 'vector': Goods.image_to_embedding(img_path)}
                 objects_list.append(obj_img)
+            end_yolo = time.perf_counter()
+            print(f'yolo detect total time: {end_yolo - start_yolo}')
         return JsonResponse({"status": "success", "vector": image_vector, "objects": objects_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
@@ -168,9 +171,10 @@ def goods_to_vectors(request):
         for good in goods_list:
             image_url = good.get('list_url')
             image_path = Goods.temp_image_path(image_url)
-            image_vector = Goods.image_to_embedding(image_path)
-            vector = {"id": good.get('id'), 'vector': image_vector}
-            vectors_list.append(vector)
+            if image_path is not None:
+                image_vector = Goods.image_to_embedding(image_path)
+                vector = {"id": good.get('id'), 'vector': image_vector}
+                vectors_list.append(vector)
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 

@@ -146,6 +146,7 @@ class Goods(models.Model):
             print(f"Error：{e}")
             print(f"Request failed with status code: {response.status_code}")
             print(f"Response content: {response.text}")  # 打印错误信息
+            return None
 
     def image_path(self):
         if self.image_url is not None:
