@@ -144,8 +144,6 @@ class Goods(models.Model):
             return temp_path
         except requests.exceptions.RequestException as e:
             print(f"Error：{e}")
-            print(f"Request failed with status code: {response.status_code}")
-            print(f"Response content: {response.text}")  # 打印错误信息
             return None
 
     def image_path(self):

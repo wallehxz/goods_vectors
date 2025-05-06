@@ -15,7 +15,9 @@ preprocess = weights.transforms()
 def image_embedding(image_path):
     img = read_image(image_path)  # 输出格式: CxHxW, 值范围[0, 255]
     img = img[:3, :, :]
-    img_tensor = preprocess(img).unsqueeze(0)
+    img_tensor = preprocess(img).unsqueeze(0)  # [1, 3, 224, 224]
+    if len(img_tensor.size()) == 5:
+        img_tensor = img_tensor[:, 0, :, :, :]
     with torch.no_grad():
         features = model(img_tensor)  # 输出: [1, 960]
     return features.squeeze(0).tolist()  # 返回: [960]
