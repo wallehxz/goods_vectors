@@ -173,9 +173,13 @@ def goods_to_vectors(request):
             image_url = good.get('list_url')
             image_path = Goods.temp_image_path(image_url)
             if image_path is not None:
-                image_vector = Goods.image_to_embedding(image_path)
-                vector = {"id": good.get('id'), 'vector': image_vector}
-                vectors_list.append(vector)
+                try:
+                    image_vector = Goods.image_to_embedding(image_path)
+                    vector = {"id": good.get('id'), 'vector': image_vector}
+                    vectors_list.append(vector)
+                except Exception as e:
+                    print(f"embedding error：{e}")
+                    print(f"image_url: {image_url}")
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
