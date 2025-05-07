@@ -163,6 +163,8 @@ def image_to_vector(request):
 
 @csrf_exempt
 def goods_to_vectors(request):
+    time_limit = 50  # 设定时间限制为50秒
+    start_time = time.time()
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         verify_flag = data.get('flag', '')
@@ -185,6 +187,9 @@ def goods_to_vectors(request):
                 vectors_list.append({"id": good.get('id'), 'state': 500})
                 print(f"Error：{e}")
                 print(f"image_url: {image_url}")
+            if time.time() - start_time >= time_limit:
+                break
+        print(f"completed vectors total： {len(vectors_list)}")
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
