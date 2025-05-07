@@ -173,7 +173,6 @@ def goods_to_vectors(request):
         vectors_list = []
         for good in goods_list:
             image_url = good.get('list_url')
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
             image_path = asyncio.run(Goods.temp_image_path(image_url))
             if image_path:
                 try:

@@ -151,7 +151,6 @@ class Goods(models.Model):
 
     def image_path(self):
         if self.image_url is not None:
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
             return asyncio.run(Goods.temp_image_path(self.image_url, file_name=f'goods_{self.id}.jpg'))
         elif self.image and self.image.url:
             return self.image.path
