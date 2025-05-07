@@ -173,18 +173,15 @@ def goods_to_vectors(request):
         vectors_list = []
         for good in goods_list:
             image_url = good.get('list_url')
-            image_path = asyncio.run(Goods.temp_image_path(image_url))
-            if image_path:
-                try:
-                    image_vector = Goods.image_to_embedding(image_path)
-                    vector = {"id": good.get('id'), 'vector': image_vector, 'state': 200}
-                    vectors_list.append(vector)
-                except Exception as e:
-                    vectors_list.append({"id": good.get('id'), 'state': 500})
-                    print(f"embedding error：{e}")
-                    print(f"image_url: {image_url}")
-            else:
-                vectors_list.append({"id": good.get('id'), 'state': 404})
+            try:
+                image_path = asyncio.run(Goods.temp_image_path(image_url))
+                image_vector = Goods.image_to_embedding(image_path)
+                vector = {"id": good.get('id'), 'vector': image_vector, 'state': 200}
+                vectors_list.append(vector)
+            except Exception as e:
+                vectors_list.append({"id": good.get('id'), 'state': 500})
+                print(f"embedding error：{e}")
+                print(f"image_url: {image_url}")
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
