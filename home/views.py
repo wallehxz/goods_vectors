@@ -168,6 +168,7 @@ def goods_to_vectors(request):
         if verify_flag != settings.VERIFY_FLAG:
             return JsonResponse({"status": "Unauthorized"}, safe=False)
         goods_list = data.get('goods', [])
+        print(f"processing goods total: {len(goods_list)}")
         vectors_list = []
         for good in goods_list:
             image_url = good.get('list_url')
