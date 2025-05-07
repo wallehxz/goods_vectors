@@ -145,7 +145,7 @@ class Goods(models.Model):
                     with open(temp_path, 'wb') as f:
                         f.write(await response.read())
             return temp_path
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             print(f"Error：{e}")
             return None
 
