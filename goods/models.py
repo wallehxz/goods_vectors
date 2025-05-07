@@ -140,7 +140,7 @@ class Goods(models.Model):
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
             }
             async with aiohttp.ClientSession() as session:
-                async with session.get(image_url, headers=headers, timeout=10) as response:
+                async with session.get(image_url, headers=headers, timeout=10, ssl=False) as response:
                     response.raise_for_status()  # 检查请求是否成功
                     with open(temp_path, 'wb') as f:
                         f.write(await response.read())
