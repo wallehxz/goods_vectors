@@ -197,7 +197,7 @@ class Goods(models.Model):
             from utils.model_torch_resnet50 import image_embedding as trn50_embedding
             embedding = trn50_embedding(image_path)
         end = time.perf_counter()
-        print(f'{image_path} embedding time: {end - start}')
+        print(f'{os.path.basename(image_path)} embedding time: {end - start}')
         return embedding
 
 
