@@ -163,7 +163,7 @@ def image_to_vector(request):
 
 @csrf_exempt
 def goods_to_vectors(request):
-    time_limit = 50  # 设定时间限制为50秒
+    time_limit = 55  # 设定时间限制为一分钟
     start_time = time.time()
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
