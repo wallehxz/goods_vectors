@@ -1,6 +1,8 @@
 import uuid
 import os
 import time
+import aiohttp
+import asyncio
 from django.db import models
 import requests
 from django.conf import settings
@@ -115,7 +117,7 @@ class Goods(models.Model):
             return False
 
     @classmethod
-    def temp_image_path(cls, image_url, file_name=None, base_dir='temps'):
+    async def temp_image_path(cls, image_url, file_name=None, base_dir='temps'):
         try:
             temp_dir = os.path.join(settings.MEDIA_ROOT, base_dir)
             os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
@@ -128,19 +130,20 @@ class Goods(models.Model):
                 temp_path = os.path.join(temp_dir, f'{uuid.uuid4()}.jpg')
 
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
                 "Accept-Encoding": "gzip, deflate, br, zstd",
                 "Accept-Language": "zh-CN,zh;q=0.9",
                 "Cache-Control": "no-cache",
-                "Sec-Ch-Ua": '"Not A(Brand";v="8", "Chromium";v="132", "Google Chrome";v="132"',
+                "Sec-Ch-Ua": '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
                 "Upgrade-Insecure-Requests": "1",
                 "Sec-Ch-Ua-Platform": '"Windows"',
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
             }
-            response = requests.get(image_url, timeout=10, headers=headers)
-            response.raise_for_status()  # 检查请求是否成功
-            with open(temp_path, 'wb') as destination:
-                destination.write(response.content)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(image_url, headers=headers, timeout=10) as response:
+                    response.raise_for_status()  # 检查请求是否成功
+                    with open(temp_path, 'wb') as f:
+                        f.write(await response.read())
             return temp_path
         except requests.exceptions.RequestException as e:
             print(f"Error：{e}")
@@ -148,7 +151,8 @@ class Goods(models.Model):
 
     def image_path(self):
         if self.image_url is not None:
-            return Goods.temp_image_path(self.image_url, file_name=f'goods_{self.id}.jpg')
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            return asyncio.run(Goods.temp_image_path(self.image_url, file_name=f'goods_{self.id}.jpg'))
         elif self.image and self.image.url:
             return self.image.path
 
@@ -194,7 +198,7 @@ class Goods(models.Model):
             from utils.model_torch_resnet50 import image_embedding as trn50_embedding
             embedding = trn50_embedding(image_path)
         end = time.perf_counter()
-        print(f'model embedding time: {end - start}')
+        print(f'{image_path} embedding time: {end - start}')
         return embedding
 
 

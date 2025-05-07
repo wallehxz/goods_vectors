@@ -3,6 +3,7 @@ import json
 import uuid
 import os
 import time
+import asyncio
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from goods.models import Goods
@@ -172,7 +173,8 @@ def goods_to_vectors(request):
         vectors_list = []
         for good in goods_list:
             image_url = good.get('list_url')
-            image_path = Goods.temp_image_path(image_url)
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            image_path = asyncio.run(Goods.temp_image_path(image_url))
             if image_path:
                 try:
                     image_vector = Goods.image_to_embedding(image_path)
