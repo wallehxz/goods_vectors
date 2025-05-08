@@ -1,4 +1,4 @@
-Django==4.2.20
+Django==4.2.21
 #psycopg2-binary==2.9.10
 Pillow==11.1.0
 django-simpleui==2025.1.13
