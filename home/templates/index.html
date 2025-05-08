@@ -140,7 +140,17 @@
     </div>
 </div>
 
+<div id="loading">
+  <div class="spinner"></div>
+  <p>图片处理中...</p>
+</div>
+
 <div class="search-bar">
+    <label class="custom-checkbox">
+        <input type="checkbox" name="yolo" id="yolo">
+        <span class="checkmark"></span>
+        物品识别
+    </label>
     <form action="/" method="get">
         <input class="text" name="q" id='query' type="text" value="{{ q }}" placeholder="输入关键字搜索">
         <span class="photo-search-btn">
@@ -150,7 +160,6 @@
         <input type="hidden" id="image_path" name="image_path" value="{{ path }}">
         <button id='submit_search' type="submit" class="button cw-icon"><i></i>搜索</button>
     </form>
-
 </div>
 
 <div class="detect-container">
@@ -235,10 +244,16 @@
     fileInput.addEventListener('change', async (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
+        document.getElementById("loading").style.display = "block";
         // 创建 FormData 对象
         const formData = new FormData();
         formData.append('file', file);
+        const checkbox = document.getElementById('yolo');
+        // 判断是否选中
+        if (checkbox.checked) {
+            formData.append('yolo', '1');
+            console.log('Checkbox已选中');
+        }
 
         try {
             // 发送 POST 请求

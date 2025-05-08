@@ -79,21 +79,26 @@ def image_query(request):
 def image_upload(request):
     uploaded_file = request.FILES.get('file', None)
     image_path = temp_upload(uploaded_file)
-    objects_list = image_objects(image_path)
-    if objects_list:
-        if request.session.get('image_uuid') is None:
-            image_uuid = str(uuid.uuid4())
-            request.session['image_uuid'] = image_uuid
-        else:
-            image_uuid = request.session.get('image_uuid')
-        print('current image uuid: ', image_uuid)
-        cache.set(image_uuid, objects_list['objects_path'])
     image_vector = Goods.image_to_embedding(image_path)
+    path = uuid.uuid4()
+    cache.set(f'{path}', image_vector)
+    if request.POST.get('yolo', '0') == '1':
+        objects_list = image_objects(image_path)
+        if objects_list:
+            if request.session.get('image_uuid') is None:
+                image_uuid = str(uuid.uuid4())
+                request.session['image_uuid'] = image_uuid
+            else:
+                image_uuid = request.session.get('image_uuid')
+            print('current image uuid: ', image_uuid)
+            cache.set(image_uuid, objects_list['objects_path'])
+    else:
+        image_uuid = request.session.get('image_uuid')
+        if request.session.get('image_uuid'):
+            cache.set(image_uuid, [])
     if os.path.exists(image_path):
         print('Delete temp image:', image_path)
         os.remove(image_path)
-    path = uuid.uuid4()
-    cache.set(f'{path}', image_vector)
     return JsonResponse({"status": "success", "path": path}, safe=False)
 
 
