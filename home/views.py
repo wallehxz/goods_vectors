@@ -107,10 +107,10 @@ def set_yolo_model(request):
 def temp_upload(uploaded_file):
     temp_dir = os.path.join(settings.MEDIA_ROOT, 'temps')
     os.makedirs(temp_dir, exist_ok=True)  # 确保目录存在
-    temp_path = os.path.join(temp_dir, uploaded_file.name)
-    with open(temp_path, 'wb') as destination:
+    temp_path = os.path.join(temp_dir, f"{uuid.uuid4()}.{uploaded_file.name.split('.')[-1]}")
+    with open(temp_path, 'wb') as f:
         for chunk in uploaded_file.chunks():
-            destination.write(chunk)
+            f.write(chunk)
     return temp_path
 
 
