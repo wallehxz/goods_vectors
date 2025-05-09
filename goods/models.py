@@ -146,7 +146,7 @@ class Goods(models.Model):
                         f.write(await response.read())
             return temp_path
         except Exception as e:
-            print(f"Error：{e}")
+            print(f"Error: {e}")
             return None
 
     def image_path(self):

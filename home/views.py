@@ -194,7 +194,7 @@ def goods_to_vectors(request):
                 print(f"image_url: {image_url}")
             if time.time() - start_time >= time_limit:
                 break
-        print(f"completed vectors total： {len(vectors_list)}")
+        print(f"completed vectors total: {len(vectors_list)}")
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
