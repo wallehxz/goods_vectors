@@ -11,7 +11,7 @@ tensorflow==2.15.0
 # onnx2keras==0.0.24
 # onnx-tf==1.10.0
 numpy==1.24.3
-torch==2.5.1
+torch==2.7.0
 requests==2.32.3
 torchvision==0.20.1
 pymilvus==2.5.6
