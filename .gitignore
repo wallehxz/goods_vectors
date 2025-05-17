@@ -45,3 +45,4 @@ local_settings.py
 dist/
 build/
 desktop.ini
+playwright_data/

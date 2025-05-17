@@ -14,6 +14,8 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Case, When
 from utils.yolo_detect import image_objects
+from utils.pdd_api import search_keywords, goods_detail
+from utils.browser import AsyncBrowser
 
 
 def index(request):
@@ -197,5 +199,41 @@ def goods_to_vectors(request):
         print(f"completed vectors total: {len(vectors_list)}")
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
+
+def pdd_goods_search(request):
+    keyword = request.GET.get('keyword', '')
+    page = int(request.GET.get('page', 1))
+    result =  search_keywords(keyword, page)
+    return JsonResponse({"status": "success", "result": result}, safe=False)
+
+
+def pdd_goods_detail(request):
+    goods_id = request.GET.get('goods_id', '')
+    result =  goods_detail(goods_id)
+    return JsonResponse({"status": "success", "result": result}, safe=False)
+
+
+async def web_pdd_search(request):
+    manager = AsyncBrowser()
+    try:
+        context = await manager.get_browser()
+        page = await manager.get_page()
+        keyword = request.GET.get('keyword', '')
+        await manager.pdd_user_login(context, page)
+        await page.goto("https://mobile.yangkeduo.com")
+        await page.click('div._2fnObgNt._215Ua8G9')
+        await page.locator('input[type=search]').fill(keyword)
+        await page.click('div.RuSDrtii')
+        print(f'current page: {page.url}')
+        await manager.smooth_scroll(page)
+        content = await page.content()
+        return JsonResponse({"status": "success", "page": content}, safe=False)
+    except Exception as e:
+        return JsonResponse({"status": "error", "msg": str(e)}, safe=False)
+    finally:
+        await page.close()
+        await context.close()
+
+
 
 # Create your views here.
