@@ -17,8 +17,8 @@ class PddRequest:
         self.params['timestamp'] = str(int(time.time()))
         self.params['data_type'] = 'JSON'
         self.params['page_size'] = 100
-        self.params['pid'] = '42893128_305099068'
-        self.params['custom_parameters'] = '9527'
+        self.params['pid'] = '42893128_305187033'
+        self.params['custom_parameters'] = '19491001'
 
 
 def upper_md5(text):
@@ -52,7 +52,11 @@ def search_keywords(keywords, page=1, list_id=''):
         request.params['list_id'] = list_id
     request.params['sign'] = sign_params(request.params)
     resp = requests.post(request.host, json=request.params, headers=request.headers)
-    return resp.json().get('goods_search_response')
+    success = resp.json().get('goods_search_response')
+    if success:
+        return success
+    else:
+        return resp.json()
 
 
 def goods_detail(goods_sign):
@@ -61,6 +65,8 @@ def goods_detail(goods_sign):
     request.params['goods_sign'] = goods_sign
     request.params['sign'] = sign_params(request.params)
     resp = requests.post(request.host, json=request.params, headers=request.headers)
-    return resp.json().get('goods_detail_response')
-
-
+    success = resp.json().get('goods_detail_response')
+    if success:
+        return success
+    else:
+        return resp.json()

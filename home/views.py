@@ -200,17 +200,29 @@ def goods_to_vectors(request):
         return JsonResponse({"status": "success", "vectors": vectors_list}, safe=False)
     return JsonResponse({"status": "Unauthorized"}, safe=False)
 
+@csrf_exempt
 def pdd_goods_search(request):
-    keyword = request.GET.get('keyword', '')
-    page = int(request.GET.get('page', 1))
-    result =  search_keywords(keyword, page)
-    return JsonResponse({"status": "success", "result": result}, safe=False)
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        verify_flag = data.get('flag', '')
+        if verify_flag != settings.VERIFY_FLAG:
+            return JsonResponse({"status": "Unauthorized"}, safe=False)
+        keyword = data.get('keyword', '')
+        page = int(data.get('page', 1))
+        list_id = data.get('list_id', '')
+        result =  search_keywords(keyword, page, list_id)
+        return JsonResponse({"status": "success", "result": result}, safe=False)
 
-
+@csrf_exempt
 def pdd_goods_detail(request):
-    goods_sign = request.GET.get('goods_sign', '')
-    result =  goods_detail(goods_sign)
-    return JsonResponse({"status": "success", "result": result}, safe=False)
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        verify_flag = data.get('flag', '')
+        if verify_flag != settings.VERIFY_FLAG:
+            return JsonResponse({"status": "Unauthorized"}, safe=False)
+        goods_sign = data.GET.get('goods_sign', '')
+        result =  goods_detail(goods_sign)
+        return JsonResponse({"status": "success", "result": result}, safe=False)
 
 
 async def web_pdd_search(request):
