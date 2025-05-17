@@ -61,6 +61,6 @@ def goods_detail(goods_sign):
     request.params['goods_sign'] = goods_sign
     request.params['sign'] = sign_params(request.params)
     resp = requests.post(request.host, json=request.params, headers=request.headers)
-    return resp.json()
+    return resp.json().get('goods_detail_response')
 
 
