@@ -208,8 +208,8 @@ def pdd_goods_search(request):
 
 
 def pdd_goods_detail(request):
-    goods_id = request.GET.get('goods_id', '')
-    result =  goods_detail(goods_id)
+    goods_sign = request.GET.get('goods_sign', '')
+    result =  goods_detail(goods_sign)
     return JsonResponse({"status": "success", "result": result}, safe=False)
 
 

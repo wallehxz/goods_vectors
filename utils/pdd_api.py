@@ -55,10 +55,10 @@ def search_keywords(keywords, page=1, list_id=''):
     return resp.json().get('goods_search_response')
 
 
-def goods_detail(goods_id):
+def goods_detail(goods_sign):
     request = PddRequest('pdd.ddk.goods.detail')
     request.params['need_sku_info'] = 'true'
-    request.params['goods_sign'] = goods_id
+    request.params['goods_sign'] = goods_sign
     request.params['sign'] = sign_params(request.params)
     resp = requests.post(request.host, json=request.params, headers=request.headers)
     return resp.json().get('goods_search_response')
