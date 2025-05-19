@@ -14,7 +14,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Case, When
 from utils.yolo_detect import image_objects
-from utils.pdd_api import search_keywords, goods_detail
+from utils.pdd_api import search_keywords, goods_detail, jpk_goods_search, cats_list
 from utils.browser import AsyncBrowser
 
 
@@ -208,9 +208,11 @@ def pdd_goods_search(request):
         if verify_flag != settings.VERIFY_FLAG:
             return JsonResponse({"status": "Unauthorized"}, safe=False)
         keyword = data.get('keyword', '')
+        cat_id = data.get('cat_id', 0)
         page = int(data.get('page', 1))
         list_id = data.get('list_id', '')
-        result =  search_keywords(keyword, page, list_id)
+        result =  search_keywords(keyword, page, list_id, cat_id)
+        # result =  jpk_goods_search(keyword, page, list_id)
         return JsonResponse({"status": "success", "result": result}, safe=False)
 
 @csrf_exempt
@@ -220,8 +222,18 @@ def pdd_goods_detail(request):
         verify_flag = data.get('flag', '')
         if verify_flag != settings.VERIFY_FLAG:
             return JsonResponse({"status": "Unauthorized"}, safe=False)
-        goods_sign = data.GET.get('goods_sign', '')
+        goods_sign = data.get('goods_sign', '')
         result =  goods_detail(goods_sign)
+        return JsonResponse({"status": "success", "result": result}, safe=False)
+
+@csrf_exempt
+def pdd_cats_list(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        verify_flag = data.get('flag', '')
+        if verify_flag != settings.VERIFY_FLAG:
+            return JsonResponse({"status": "Unauthorized"}, safe=False)
+        result = cats_list()
         return JsonResponse({"status": "success", "result": result}, safe=False)
 
 
