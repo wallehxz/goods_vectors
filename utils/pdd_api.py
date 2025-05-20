@@ -57,8 +57,8 @@ def search_keywords(r_params):
     request.params['page_size'] = 50
     if r_params.get('keyword'):
         request.params['keyword'] = r_params.get('keyword')
-    if r_params.get('page') > 1:
-        request.params['page'] = r_params.get('page')
+    if r_params.get('page'):
+        request.params['page'] = int(r_params.get('page'))
     if r_params.get('list_id'):
         request.params['list_id'] = r_params.get('list_id')
     if r_params.get('cat_id'):
