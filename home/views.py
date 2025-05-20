@@ -207,11 +207,7 @@ def pdd_goods_search(request):
         verify_flag = data.get('flag', '')
         if verify_flag != settings.VERIFY_FLAG:
             return JsonResponse({"status": "Unauthorized"}, safe=False)
-        keyword = data.get('keyword', '')
-        cat_id = data.get('cat_id', 0)
-        page = int(data.get('page', 1))
-        list_id = data.get('list_id', '')
-        result =  search_keywords(keyword, page, list_id, cat_id)
+        result =  search_keywords(data)
         # result =  jpk_goods_search(keyword, page, list_id)
         return JsonResponse({"status": "success", "result": result}, safe=False)
 

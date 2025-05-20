@@ -47,7 +47,7 @@ def sign_params(params):
     return upper_md5(params_string)
 
 
-def search_keywords(keywords, page=1, list_id='', cat_id=0):
+def search_keywords(r_params):
     request = PddRequest('pdd.ddk.goods.search')
     request.params['use_customized'] = 'false'
     request.params['with_coupon'] = 'false'
@@ -55,14 +55,14 @@ def search_keywords(keywords, page=1, list_id='', cat_id=0):
     request.params['custom_parameters'] = '19491001'
     request.params['sort_type'] = 0
     request.params['page_size'] = 50
-    if keywords != '':
-        request.params['keyword'] = keywords
-    if page > 1:
-        request.params['page'] = page
-    if list_id != '':
-        request.params['list_id'] = list_id
-    if cat_id != 0:
-        request.params['cat_id'] = cat_id
+    if r_params.get('keyword'):
+        request.params['keyword'] = r_params.get('keyword')
+    if r_params.get('page') > 1:
+        request.params['page'] = r_params.get('page')
+    if r_params.get('list_id'):
+        request.params['list_id'] = r_params.get('list_id')
+    if r_params.get('cat_id'):
+        request.params['cat_id'] = r_params.get('cat_id')
     request.params['sign'] = sign_params(request.params)
     resp = requests.post(request.host, json=request.params, headers=request.headers)
     success = resp.json().get('goods_search_response')
