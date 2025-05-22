@@ -1,0 +1,297 @@
+/* 基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 商品容器 */
+.product-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* 商品图片区 */
+.product-gallery {
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+    position: relative;
+}
+
+.main-image {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    position: relative;
+}
+
+.main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.main-image:hover img {
+    transform: scale(1.02);
+}
+
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.thumbnail.active {
+    border-color: #ff6b6b;
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.prev-btn, .next-btn {
+    position: absolute;
+    top: 25%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.prev-btn:hover, .next-btn:hover {
+    background: #fff;
+}
+
+.prev-btn {
+    left: 30px;
+}
+
+.next-btn {
+    right: 30px;
+}
+
+/* 商品信息区 */
+.product-info {
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+}
+
+.product-info h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.stars {
+    color: #ffc107;
+    margin-right: 10px;
+}
+
+.review-count {
+    color: #666;
+    font-size: 14px;
+}
+
+.price-container {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+}
+
+.current-price {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin-right: 15px;
+}
+
+.original-price {
+    font-size: 18px;
+    color: #999;
+    text-decoration: line-through;
+    margin-right: 15px;
+}
+
+.discount {
+    background: #ff6b6b;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.color-options, .quantity-selector {
+    margin: 25px 0;
+}
+
+.color-options h3, .quantity-selector h3 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #555;
+}
+
+.color-selector {
+    display: flex;
+    gap: 10px;
+}
+
+.color-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.color-option.active {
+    border-color: #ff6b6b;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    width: 120px;
+}
+
+.quantity-control button {
+    width: 30px;
+    height: 30px;
+    background: #f0f0f0;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantity-control button:hover {
+    background: #e0e0e0;
+}
+
+.quantity-control input {
+    width: 60px;
+    height: 30px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.action-buttons button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-to-cart {
+    background: #ff6b6b;
+    color: white;
+}
+
+.add-to-cart:hover {
+    background: #ff5252;
+}
+
+.buy-now {
+    background: #333;
+    color: white;
+}
+
+.buy-now:hover {
+    background: #222;
+}
+
+.product-description {
+    margin-top: 30px;
+}
+
+.product-description h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #444;
+}
+
+.product-description p {
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.product-description ul {
+    padding-left: 20px;
+    color: #666;
+}
+
+.product-description li {
+    margin-bottom: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .product-container {
+        flex-direction: column;
+    }
+
+    .main-image {
+        height: 300px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons button {
+        width: 100%;
+    }
+}

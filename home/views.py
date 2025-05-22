@@ -4,6 +4,7 @@ import uuid
 import os
 import time
 import asyncio
+import math
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from goods.models import Goods
@@ -45,6 +46,35 @@ def index(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'index.html', locals())
 
+
+
+def pdd_index(request):
+    params = request.GET.copy()
+    if params.get('keyword'):
+        params['page_size'] = 70
+        result  = search_keywords(params)
+        goods_list = result.get('goods_list')
+        if goods_list:
+            params['list_id'] = result.get('list_id')
+            total_count = result.get('total_count')
+            total_page = total_page = math.ceil(total_count / 70)
+            current_page = int(params.get('page', 1))
+            prev_page = current_page - 1
+            next_page = current_page + 1
+            range_page = range(1, total_page + 1)
+        else:
+            return JsonResponse(result, safe=False)
+    if params.get('page'):
+        del params['page']
+    params = params.urlencode()
+    return render(request, 'pdd_index.html', locals())
+
+
+def pdd_show(request):
+    goods_sign = request.GET.get('goods_sign')
+    result = goods_detail(goods_sign).get("goods_details")[0]
+    discount = int((result.get("min_normal_price") - result.get("min_group_price")) / result.get("min_normal_price") * 100)
+    return render(request, 'pdd_show.html', locals())
 
 def image_query(request):
     simi_index = {}
@@ -253,7 +283,5 @@ async def web_pdd_search(request):
     finally:
         await page.close()
         await context.close()
-
-
 
 # Create your views here.

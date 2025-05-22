@@ -1,10 +1,8 @@
 import time
 from django.conf import settings
 import hashlib
-from urllib.parse import quote
-from collections import OrderedDict
 import requests
-import json
+from django.core.cache import cache
 
 
 class PddRequest:
@@ -48,11 +46,16 @@ def sign_params(params):
 
 
 def search_keywords(r_params):
+    try:
+        cache.incr('search_keywords_count')
+    except:
+        cache.set('search_keywords_count', 1, timeout=None)
     request = PddRequest('pdd.ddk.goods.search')
     request.params['use_customized'] = 'false'
     request.params['with_coupon'] = 'false'
-    request.params['pid'] = '42893128_305187033'
-    request.params['custom_parameters'] = '19491001'
+    user = pdd_auth_user()
+    request.params['pid'] = user['pid']
+    request.params['custom_parameters'] = user['custom_parameters']
     request.params['sort_type'] = 0
     request.params['page_size'] = 50
     if r_params.get('keyword'):
@@ -63,38 +66,45 @@ def search_keywords(r_params):
         request.params['list_id'] = r_params.get('list_id')
     if r_params.get('cat_id'):
         request.params['cat_id'] = r_params.get('cat_id')
+    if r_params.get('page_size'):
+        request.params['page_size'] = r_params.get('page_size')
     request.params['sign'] = sign_params(request.params)
-    resp = requests.post(request.host, json=request.params, headers=request.headers)
-    success = resp.json().get('goods_search_response')
+    resp = requests.post(request.host, json=request.params, headers=request.headers).json()
+    success = resp.get('goods_search_response')
     if success:
         return success
     else:
-        return resp.json()
+        resp['req_params'] = request.params
+        return resp
 
 
 def goods_detail(goods_sign):
+    try:
+        cache.incr('goods_detail_count')
+    except:
+        cache.set('goods_detail_count', 1, timeout=None)
     request = PddRequest('pdd.ddk.goods.detail')
     request.params['need_sku_info'] = 'true'
     request.params['goods_sign'] = goods_sign
-    request.params['pid'] = '42893128_305187033'
-    request.params['custom_parameters'] = '19491001'
+    user = pdd_auth_user()
+    request.params['pid'] = user['pid']
+    request.params['custom_parameters'] = user['custom_parameters']
     request.params['sign'] = sign_params(request.params)
-    resp = requests.post(request.host, json=request.params, headers=request.headers)
-    success = resp.json().get('goods_detail_response')
+    resp = requests.post(request.host, json=request.params, headers=request.headers).json()
+    success = resp.get('goods_detail_response')
     if success:
         return success
     else:
-        return resp.json()
+        return resp
 
 
 def child_cats(cat_id):
     request = PddRequest('pdd.goods.cats.get')
     request.params['parent_cat_id'] = cat_id
     request.params['sign'] = sign_params(request.params)
-    resp = requests.post(request.host, json=request.params, headers=request.headers)
-    success = resp.json().get('goods_cats_get_response', None).get('goods_cats_list', None)
+    resp = requests.post(request.host, json=request.params, headers=request.headers).json()
+    success = resp.get('goods_cats_get_response', None).get('goods_cats_list', None)
     if success:
-        # print(f'get cat total: {len(success)}')
         return success
     else:
         return []
@@ -106,7 +116,8 @@ def cats_list(cat_id=0, cat_list=None):
     for child in child_cats(cat_id):
         cat_list.append(child)
         if child.get('level') <= 4:
-            print(f'current list total: {len(cat_list)}, current list level: {child.get("level")}, current cat id: {child.get("cat_id")}')
+            print(
+                f'current list total: {len(cat_list)}, current list level: {child.get("level")}, current cat id: {child.get("cat_id")}')
             cats_list(child.get('cat_id'), cat_list)
     return cat_list
 
@@ -127,3 +138,31 @@ def jpk_goods_search(keywords, page=1, list_id=''):
         return resp.json().get('data')
     else:
         return resp.json()
+
+
+def pdd_auth_user():
+    import random
+    all_pid = [
+        {"pid": "42893128_305187033", "custom_parameters": "19491001"},
+        {"pid": "42893128_305099068", "custom_parameters": "9527"},
+        {"pid": "42893128_305339946", "custom_parameters": "100001"},
+        {"pid": "42893128_305341966", "custom_parameters": "100002"},
+        {"pid": "42893128_305341966", "custom_parameters": "100003"},
+        {"pid": "42893128_305341966", "custom_parameters": "100004"},
+        {"pid": "42893128_305341966", "custom_parameters": "100006"},
+        {"pid": "42893128_305341966", "custom_parameters": "100007"},
+        {"pid": "42893128_305341966", "custom_parameters": "100008"},
+        {"pid": "42893128_305341966", "custom_parameters": "100009"},
+        {"pid": "42893128_305341966", "custom_parameters": "100010"},
+        {"pid": "42893128_305341966", "custom_parameters": "100011"},
+        {"pid": "42893128_305341966", "custom_parameters": "100012"},
+        {"pid": "42893128_305341966", "custom_parameters": "100013"},
+        {"pid": "42893128_305341966", "custom_parameters": "100014"},
+        {"pid": "42893128_305341966", "custom_parameters": "100015"},
+        {"pid": "42893128_305341966", "custom_parameters": "100016"},
+        {"pid": "42893128_305341966", "custom_parameters": "100017"},
+        {"pid": "42893128_305341966", "custom_parameters": "100018"},
+        {"pid": "42893128_305341966", "custom_parameters": "100019"},
+        {"pid": "42893128_305341966", "custom_parameters": "100020"},
+    ]
+    return random.choice(all_pid)

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+{% load static %}
+{% load custom_tags %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ result.goods_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'images/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'stylesheets/index.css' %}">
+    <link rel="stylesheet" href="{% static 'stylesheets/pdd_detail.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img class="brand" src="{% static 'images/logo.png' %}">
+        </div>
+        <div class="user-actions">
+            <a style="padding-right: 20px;padding-left: 20px;text-decoration: none;color: #FFFFFF" href="/">首页</a>
+            <a style="padding-right: 20px;padding-left: 20px;text-decoration: none;color: #FFFFFF" href="/pdd">拼多多</a>
+            <a style="padding-right: 20px;padding-left: 20px;text-decoration: none;color: #FFFFFF" href="/admin">登录</a>
+        </div>
+    </div>
+<div class="product-container">
+        <!-- 商品图片轮播区 -->
+        <div class="product-gallery">
+            <div class="main-image">
+                <img id="mainImage" src="{{ result.goods_image_url }}" alt="商品主图">
+            </div>
+            <div class="thumbnail-container">
+                {% for item in result.goods_gallery_urls %}
+                    <div class="thumbnail" onclick="changeImage('{{ item }}')">
+                        <img src="{{ item }}">
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="prev-btn" onclick="prevImage()"><i class="fas fa-chevron-left"></i></button>
+            <button class="next-btn" onclick="nextImage()"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- 商品信息区 -->
+        <div class="product-info">
+            <h1>{{ result.goods_name }}</h1>
+            <div class="rating">
+                <span class="stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </span>
+                <span class="review-count">销量：{{ result.sales_tip }}</span>
+            </div>
+            
+            <div class="price-container">
+                <span class="current-price">{% pdd_price result.min_group_price %}</span>
+                <span class="original-price">{% pdd_price result.min_normal_price %}</span>
+                <span class="discount">{{ discount }}% OFF</span>
+            </div>
+            
+            <div class="color-options">
+                <h3>颜色选择</h3>
+                <div class="color-selector">
+                    <div class="color-option active" style="background-color: #1E4F8F;" title="海湾蓝"></div>
+                    <div class="color-option" style="background-color: #8C8C8C;" title="雅灰"></div>
+                    <div class="color-option" style="background-color: #4A6B2A;" title="橄榄绿"></div>
+                    <div class="color-option" style="background-color: #D22630;" title="烈焰红"></div>
+                    <div class="color-option" style="background-color: #1A1A1A;" title="曜石黑"></div>
+                </div>
+            </div>
+            
+            <div class="quantity-selector">
+                <h3>数量</h3>
+                <div class="quantity-control">
+                    <button class="decrease">-</button>
+                    <input type="number" value="1" min="1">
+                    <button class="increase">+</button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="add-to-cart">加入购物车</button>
+                <button class="buy-now">立即购买</button>
+            </div>
+            
+            <div class="product-description">
+                <h3>{{ result.mall_name }}</h3>
+                <p>{{ result.goods_desc }}</p>
+                <ul>
+                    {% for item in result.unified_tags %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'javascript/pdd_detail.js' %}"></script>
+
+</body>
+</html>

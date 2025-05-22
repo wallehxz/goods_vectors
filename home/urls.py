@@ -4,6 +4,8 @@ from home import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('pdd', views.pdd_index, name='pdd_index'),
+    path('pdd_show', views.pdd_show, name='pdd_show'),
     path('image_upload', views.image_upload, name='image_upload'),
     path('image_to_vector', views.image_to_vector, name='image_to_vector'),
     path('pdd_goods_search', views.pdd_goods_search, name='pdd_goods_search'),
