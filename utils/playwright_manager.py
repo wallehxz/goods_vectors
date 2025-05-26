@@ -33,7 +33,7 @@ async def close_browser():
 async def pdd_user_login(page):
     await page.goto("https://mobile.yangkeduo.com/login.html")
     await page.click('div.phone-login', timeout=2000)
-    pdd_login_state = cache.get('pdd_login_state1', None)
+    pdd_login_state = cache.get('pdd_login_state', None)
     if pdd_login_state is None:
         current_url = page.url
         while 'login.html' in current_url:

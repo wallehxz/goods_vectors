@@ -290,7 +290,7 @@ async def web_pdd_detail(request):
         goods_id = request.GET.get('goods_id')
         show_url = f"https://mobile.yangkeduo.com/goods.html?goods_id={goods_id}"
         browser = await get_browser()
-        pdd_login_state = cache.get('pdd_login_state1', None)
+        pdd_login_state = cache.get('pdd_login_state', None)
         if pdd_login_state:
             context = await browser.new_context(
                 storage_state=pdd_login_state,
