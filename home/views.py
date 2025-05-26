@@ -319,9 +319,9 @@ async def web_pdd_detail(request):
             await page.goto(show_url)
         # content = await page.content()
         raw_data = await page.evaluate("() => window.rawData")
-        skus = raw_data["store"]["initDataObj"]["goods"]["skus"]
+        goods = raw_data["store"]["initDataObj"]["goods"]
         await close_browser()
-        return JsonResponse({"status": "success", "skus": parse_nested_json(skus)}, safe=False)
+        return JsonResponse({"status": "success", "goods": parse_nested_json(goods)}, safe=False)
     except Exception as e:
         return JsonResponse({"status": "error", "msg": str(e)}, safe=False)
 
