@@ -1,4 +1,6 @@
 import json
+import sys
+
 from playwright.async_api import async_playwright
 import time
 from django.core.cache import cache
@@ -13,7 +15,8 @@ async def get_browser():
     global _browser, _playwright
     if not _browser:
         _playwright = await async_playwright().start()
-        _browser = await _playwright.chromium.launch(headless=False)
+        headless = True if sys.platform == 'linux' else False
+        _browser = await _playwright.chromium.launch(headless=headless)
     return _browser
 
 
