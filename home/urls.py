@@ -14,4 +14,5 @@ urlpatterns = [
     path('goods_to_vectors', views.goods_to_vectors, name='goods_to_vectors'),
     path('set_yolo_model', views.set_yolo_model, name='set_yolo_model'),
     path('web_pdd_search', views.web_pdd_search, name='web_pdd_search'),
+    path('web_pdd_detail', views.web_pdd_detail, name='web_pdd_detail'),
 ]

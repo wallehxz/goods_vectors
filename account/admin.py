@@ -1,6 +1,6 @@
 import json
 from django.contrib import admin
-from account.models import Consumer
+from account.models import Consumer, PddUser
 
 
 @admin.register(Consumer)
@@ -11,3 +11,8 @@ class ConsumerAdmin(admin.ModelAdmin):
         return obj.role_display()
 
     role_name.short_description = '角色'
+
+
+@admin.register(PddUser)
+class PddUserAdmin(admin.ModelAdmin):
+    list_display = ('mobile', 'sms_code', 'created_at', 'updated_at')

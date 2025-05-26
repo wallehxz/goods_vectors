@@ -17,6 +17,7 @@ from django.db.models import Case, When
 from utils.yolo_detect import image_objects
 from utils.pdd_api import search_keywords, goods_detail, jpk_goods_search, cats_list
 from utils.browser import AsyncBrowser
+from utils.playwright_manager import get_browser, pdd_user_login, close_browser, parse_nested_json
 
 
 def index(request):
@@ -283,5 +284,45 @@ async def web_pdd_search(request):
     finally:
         await page.close()
         await context.close()
+
+async def web_pdd_detail(request):
+    try:
+        goods_id = request.GET.get('goods_id')
+        show_url = f"https://mobile.yangkeduo.com/goods.html?goods_id={goods_id}"
+        browser = await get_browser()
+        pdd_login_state = cache.get('pdd_login_state1', None)
+        if pdd_login_state:
+            context = await browser.new_context(
+                storage_state=pdd_login_state,
+                viewport = {"width": 390, "height": 844},  # 逻辑像素
+                device_scale_factor = 3,  # 设备像素比（DPR）
+                user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
+                is_mobile = True,
+                has_touch = True
+            )
+            page = await context.new_page()
+        else:
+            context = await browser.new_context(
+                viewport={"width": 390, "height": 844},  # 逻辑像素
+                device_scale_factor=3,  # 设备像素比（DPR）
+                user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
+                is_mobile=True,
+                has_touch=True
+            )
+            page = await context.new_page()
+            await pdd_user_login(page)
+        await page.goto(show_url)
+        if 'login.html' in page.url:
+            cache.set('pdd_login_state', None)
+            print(f"cache login state invalid")
+            await pdd_user_login(page)
+            await page.goto(show_url)
+        # content = await page.content()
+        raw_data = await page.evaluate("() => window.rawData")
+        skus = raw_data["store"]["initDataObj"]["goods"]["skus"]
+        await close_browser()
+        return JsonResponse({"status": "success", "skus": parse_nested_json(skus)}, safe=False)
+    except Exception as e:
+        return JsonResponse({"status": "error", "msg": str(e)}, safe=False)
 
 # Create your views here.
