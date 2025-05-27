@@ -323,6 +323,7 @@ async def web_pdd_detail(request):
         await close_browser()
         return JsonResponse({"status": "success", "goods": parse_nested_json(goods)}, safe=False)
     except Exception as e:
+        await close_browser()
         return JsonResponse({"status": "error", "msg": str(e)}, safe=False)
 
 # Create your views here.
