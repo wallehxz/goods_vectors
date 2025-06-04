@@ -293,7 +293,8 @@ async def web_pdd_detail(request):
         async with AsyncBrowser() as ab:
             browser = await ab.get_browser()
             mobile = await get_available_mobile()
-            pdd_login_state = cache.get(f"pdd_{mobile}_cookies", None)
+            current_mobile = f"pdd_{mobile}_cookies"
+            pdd_login_state = cache.get(current_mobile, None)
             if pdd_login_state:
                 context = await browser.new_context(
                     storage_state=pdd_login_state,
@@ -316,13 +317,13 @@ async def web_pdd_detail(request):
                 await pdd_user_login(page, mobile)
             await page.goto(show_url)
             if 'login.html' in page.url:
-                cache.set('pdd_login_state', None)
+                cache.set(current_mobile, None)
                 print(f"cache login state invalid")
                 await pdd_user_login(page, mobile)
                 await page.goto(show_url)
             # content = await page.content()
             raw_data = await page.evaluate("() => window.rawData")
-            goods = raw_data["store"]["initDataObj"]["goods"]   
+            goods = raw_data["store"]["initDataObj"]["goods"]
             return JsonResponse({"status": "success", "current": mobile,"goods": parse_nested_json(goods)}, safe=False)
     except Exception as e:
         await ab.close()
