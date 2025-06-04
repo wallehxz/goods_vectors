@@ -17,7 +17,8 @@ from django.db.models import Case, When
 from utils.yolo_detect import image_objects
 from utils.pdd_api import search_keywords, goods_detail, jpk_goods_search, cats_list
 from utils.browser import AsyncBrowser
-from utils.playwright_manager import get_browser, pdd_user_login, close_browser, parse_nested_json
+from utils.playwright_manager import get_browser, pdd_user_login, close_browser, parse_nested_json, get_available_mobile
+from account.models import PddUser
 
 
 def index(request):
@@ -286,11 +287,12 @@ async def web_pdd_search(request):
         await context.close()
 
 async def web_pdd_detail(request):
-    try:
+    # try:
         goods_id = request.GET.get('goods_id')
         show_url = f"https://mobile.yangkeduo.com/goods.html?goods_id={goods_id}"
         browser = await get_browser()
-        pdd_login_state = cache.get('pdd_login_state', None)
+        mobile = await get_available_mobile()
+        pdd_login_state = cache.get(f"pdd_{mobile}_cookies", None)
         if pdd_login_state:
             context = await browser.new_context(
                 storage_state=pdd_login_state,
@@ -310,20 +312,20 @@ async def web_pdd_detail(request):
                 has_touch=True
             )
             page = await context.new_page()
-            await pdd_user_login(page)
+            await pdd_user_login(page, mobile)
         await page.goto(show_url)
         if 'login.html' in page.url:
             cache.set('pdd_login_state', None)
             print(f"cache login state invalid")
-            await pdd_user_login(page)
+            await pdd_user_login(page, mobile)
             await page.goto(show_url)
         # content = await page.content()
         raw_data = await page.evaluate("() => window.rawData")
         goods = raw_data["store"]["initDataObj"]["goods"]
         await close_browser()
-        return JsonResponse({"status": "success", "goods": parse_nested_json(goods)}, safe=False)
-    except Exception as e:
-        await close_browser()
-        return JsonResponse({"status": "error", "msg": str(e)}, safe=False)
+        return JsonResponse({"status": "success", "current": mobile,"goods": parse_nested_json(goods)}, safe=False)
+    # except Exception as e:
+    #     await close_browser()
+    #     return JsonResponse({"status": "error", "msg": str(e)}, safe=False)
 
 # Create your views here.

@@ -1,10 +1,11 @@
 import json
 import sys
-
 from playwright.async_api import async_playwright
 import time
 from django.core.cache import cache
 from account.models import PddUser
+from channels.db import database_sync_to_async
+from utils.redis_client import get_redis_client
 
 
 _browser = None
@@ -30,10 +31,11 @@ async def close_browser():
     _playwright = None
 
 
-async def pdd_user_login(page):
+async def pdd_user_login(page, mobile):
     await page.goto("https://mobile.yangkeduo.com/login.html")
     await page.click('div.phone-login', timeout=2000)
-    pdd_login_state = cache.get('pdd_login_state', None)
+    current_mobile = f"pdd_{mobile}_cookies"
+    pdd_login_state = cache.get(current_mobile, None)
     if pdd_login_state is None:
         current_url = page.url
         while 'login.html' in current_url:
@@ -41,7 +43,7 @@ async def pdd_user_login(page):
                 element = await page.query_selector('div.phone-login')
                 if element:
                     await element.click()
-                pdd_user = await PddUser.objects.afirst()
+                pdd_user = await PddUser.objects.aget(mobile=mobile)
                 if pdd_user:
                     await page.locator("#user-mobile").click(timeout=2000)
                     await page.locator("#user-mobile").clear()
@@ -51,7 +53,7 @@ async def pdd_user_login(page):
                     while pdd_user.sms_code is None:
                         print(f'waiting phone sms code')
                         time.sleep(10)
-                        pdd_user = await PddUser.objects.afirst()
+                        pdd_user = await PddUser.objects.aget(mobile=mobile)
                     await page.locator("#input-code").click(timeout=2000)
                     await page.locator("#input-code").clear()
                     await page.keyboard.type(pdd_user.sms_code, delay=100)
@@ -65,13 +67,13 @@ async def pdd_user_login(page):
             current_url = await page.evaluate("location.href")
             print(f'current url: {current_url}')
         state = await page.context.storage_state()
-        cache.set('pdd_login_state', state, timeout=15 * 24 * 60 * 60)
+        cache.set(current_mobile, state, timeout=15 * 24 * 60 * 60)
     else:
         await page.evaluate("location.href")
         if 'login.html' in page.url:
-            cache.set('pdd_login_state', None)
+            cache.set(current_mobile, None)
             print(f"cache login state Invalid")
-            await pdd_user_login(page)
+            await pdd_user_login(page, mobile)
 
 
 def parse_nested_json(obj):
@@ -85,3 +87,35 @@ def parse_nested_json(obj):
     elif isinstance(obj, list):
         return [parse_nested_json(item) for item in obj]
     return obj
+
+
+@database_sync_to_async
+def get_mobile_list():
+    return PddUser.objects.values_list('mobile', flat=True)
+
+
+async def get_available_mobile():
+    users = await get_mobile_list()
+    available = None
+    ucache = get_redis_client().client()
+    mobile_usage = "pdd:mobile:usage"
+    async for mobile in users:
+        """检查账号是否最近使用过"""
+        last_used = ucache.hget(mobile_usage, mobile)
+        if not last_used:
+            available = mobile
+            now = int(time.time())
+            ucache.hset(mobile_usage, mobile, now)
+            return available
+    if not available:
+        ucache.delete(mobile_usage)
+        mobile = users[0]
+        now = int(time.time())
+        ucache.hset(mobile_usage, mobile, now)
+        available = mobile
+    return available
+
+
+
+
+
