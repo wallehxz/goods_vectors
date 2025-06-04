@@ -8,27 +8,35 @@ from channels.db import database_sync_to_async
 from utils.redis_client import get_redis_client
 
 
-_browser = None
-_playwright = None
+class AsyncBrowser:
+    def __init__(self):
+        self.playwright = None
+        self.browser = None
+        self.headless = True if sys.platform == 'linux' else False
 
+    async def __aenter__(self):
+        """异步上下文管理器入口"""
+        await self.start()
+        return self
 
-async def get_browser():
-    global _browser, _playwright
-    if not _browser:
-        _playwright = await async_playwright().start()
-        headless = True if sys.platform == 'linux' else False
-        _browser = await _playwright.chromium.launch(headless=headless)
-    return _browser
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """异步上下文管理器退出"""
+        await self.close()
 
+    async def start(self):
+        """启动浏览器实例"""
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch(headless=self.headless)
 
-async def close_browser():
-    global _browser, _playwright
-    if _browser:
-        await _browser.close()
-    if _playwright:
-        await _playwright.stop()
-    _browser = None
-    _playwright = None
+    async def close(self):
+        """关闭浏览器实例"""
+        if self.browser:
+            await self.browser.close()
+        if self.playwright:
+            await self.playwright.stop()
+
+    async def get_browser(self):
+        return self.browser
 
 
 async def pdd_user_login(page, mobile):
@@ -51,7 +59,7 @@ async def pdd_user_login(page, mobile):
                     time.sleep(1)
                     await page.click("#code-button", timeout=2000)
                     while pdd_user.sms_code is None:
-                        print(f'waiting phone sms code')
+                        print(f'Waiting Phone {mobile} SMS Code')
                         time.sleep(10)
                         pdd_user = await PddUser.objects.aget(mobile=mobile)
                     await page.locator("#input-code").click(timeout=2000)
