@@ -49,7 +49,7 @@ async def pdd_user_login(page, mobile):
         while 'login.html' in current_url:
             try:
                 element = await page.query_selector('div.phone-login')
-                if element:
+                if element and await element.is_visible():
                     await element.click()
                 pdd_user = await PddUser.objects.aget(mobile=mobile)
                 if pdd_user:
@@ -71,9 +71,8 @@ async def pdd_user_login(page, mobile):
                     await page.click("#submit-button", timeout=2000)
             except Exception:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                print("错误类型：", exc_type.__name__)
-                print("错误信息：", exc_value)
-                print("错误位置：", exc_traceback.tb_frame.f_code.co_filename, "line", exc_traceback.tb_lineno)
+                print("INFO：", exc_value)
+                print("LOCATION：", exc_traceback.tb_frame.f_code.co_filename, "line", exc_traceback.tb_lineno)
             print('waiting login  seconds ...')
             current_url = await page.evaluate("location.href")
             print(f'current url: {current_url}')
