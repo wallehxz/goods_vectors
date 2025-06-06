@@ -69,8 +69,11 @@ async def pdd_user_login(page, mobile):
                     await pdd_user.asave()
                     await page.click("i.agreement-icon", timeout=2000)
                     await page.click("#submit-button", timeout=2000)
-            except Exception as e:
-                print(f"pdd_user_login error: {e}")
+            except Exception:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print("错误类型：", exc_type.__name__)
+                print("错误信息：", exc_value)
+                print("错误位置：", exc_traceback.tb_frame.f_code.co_filename, "line", exc_traceback.tb_lineno)
             print('waiting login  seconds ...')
             current_url = await page.evaluate("location.href")
             print(f'current url: {current_url}')
